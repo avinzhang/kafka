@@ -34,8 +34,9 @@ done
 #For example, if you configure like : "path.format": "'year'=YYYY/'month'=MM/'day'=dd/'hour'=HH"
 #It should be configured as:
 #"path.format": "\u0027year\u0027=YYYY/\u0027month\u0027=MM/\u0027day\u0027=dd/\u0027hour\u0027=HH"
-
-echo "Create hdfs sink connector"
+echo
+echo
+echo "----Create hdfs sink connector----"
 curl -i -X POST -H "Accept:application/json" \
     -H  "Content-Type:application/json" http://localhost:8083/connectors/ \
     -d '{
@@ -60,11 +61,11 @@ curl -i -X POST -H "Accept:application/json" \
 
 echo 
 sleep 2
-echo "Check hdfs connector status"
+echo ">> Check hdfs connector status"
 curl http://localhost:8083/connectors/hdfs-sink/status
 echo
 echo
-echo "Producer messages to hdfs topic"
+echo ">> Producer messages to hdfs topic"
 kafka-avro-console-producer --broker-list localhost:9092 --topic hdfs --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' << EOF
 {"f1": "value1"}
 {"f1": "value2"}
@@ -73,5 +74,5 @@ EOF
 sleep 2
 echo
 echo
-echo "Check data on hdfs"
+echo ">> Check data on hdfs"
 docker-compose exec hadoop-namenode hadoop fs -ls /topics
