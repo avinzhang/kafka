@@ -65,7 +65,7 @@ echo ">> Check hdfs connector status"
 curl http://localhost:8083/connectors/hdfs-sink/status
 echo
 echo
-echo ">> Producer messages to hdfs topic"
+echo ">> Produce messages to hdfs topic"
 kafka-avro-console-producer --broker-list localhost:9092 --topic hdfs --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' << EOF
 {"f1": "value1"}
 {"f1": "value2"}
