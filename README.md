@@ -1,4 +1,4 @@
-#Connectors:
+# Connectors:
   * hdfs-sink
   * jdbc: 
     * source to mysql
