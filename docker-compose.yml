@@ -311,7 +311,7 @@ services:
       MSSQL_AGENT_ENABLED: "true"
       MSSQL_PID: Standard
     volumes:
-      - ./sqlserver:/sqlserver
+      - ./connectors/sqlserver:/sqlserver
 
   splunk:
     image: splunk/splunk:7.3

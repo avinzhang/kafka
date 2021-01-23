@@ -9,4 +9,6 @@
     * s3 sink to s3
   * splunk-source
   * spooldir-source
+  * sqlserver
+    * using jdbc source to sqlserver
     
