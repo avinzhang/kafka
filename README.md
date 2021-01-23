@@ -7,4 +7,6 @@
   * s3-sink.sh
     * jdbc source to postgres
     * s3 sink to s3
+  * splunk-source
+  * spooldir-source
     
