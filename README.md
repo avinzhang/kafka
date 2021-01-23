@@ -12,3 +12,5 @@
   * sqlserver
     * using jdbc source to sqlserver
     
+# Security:
+  * zookeeper mtls
