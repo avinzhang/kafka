@@ -76,7 +76,7 @@ services:
     image: confluentinc/cp-schema-registry:$TAG
     hostname: schemaregistry
     container_name: schemaregistry
-    restart: always
+    restart: on-failure:3
     depends_on:
       - zookeeper
       - kafka
@@ -192,6 +192,20 @@ services:
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
+
+  restproxy:
+    image: confluentinc/cp-kafka-rest:$TAG
+    hostname: restproxy
+    container_name: restproxy
+    ports:
+      - "8082:8082"
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_REST_BOOTSTRAP_SERVERS: kafka:9093
+      KAFKA_REST_ID: rest_proxy
+      KAFKA_REST_HOST_NAME: restproxy
+      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
 
   controlcenter:
     image: confluentinc/cp-enterprise-control-center:$TAG
