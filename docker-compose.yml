@@ -149,10 +149,10 @@ services:
       CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
 
-  ksqlserver:
+  ksqldb-server:
     image: confluentinc/cp-ksqldb-server:$TAG
-    hostname: ksqlserver
-    container_name: ksqlserver
+    hostname: ksqldb-server
+    container_name: ksqldb-server
     depends_on:
       - kafka
       - connect
@@ -171,10 +171,10 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
 
-  ksqlserver1:
+  ksqldb-server1:
     image: confluentinc/cp-ksqldb-server:$TAG
-    hostname: ksqlserver1
-    container_name: ksqlserver1
+    hostname: ksqldb-server1
+    container_name: ksqldb-server1
     depends_on:
       - kafka
       - connect
