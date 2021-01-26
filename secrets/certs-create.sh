@@ -9,7 +9,7 @@
 rm -f *.crt *.csr *_creds *.jks *.srl *.key *.pem *.der *.p12
 
 # Generate CA key
-openssl req -new -x509 -keyout snakeoil-ca-1.key -out snakeoil-ca-1.crt -days 365 -subj '/CN=ca1.test.confluent.io/OU=TEST/O=CONFLUENT/L=PaloAlto/S=Ca/C=US' -passin pass:confluent -passout pass:confluent
+openssl req -new -x509 -keyout ca.key -out ca.crt -days 365 -subj '/CN=ca.example.com/O=EXAMPLE/L=MountainView/S=Ca/C=US' -passin pass:confluent -passout pass:confluent
 
 for i in zookeeper kafka kafka1 client schemaregistry restproxy connect connect1 ksqldb-server ksqldb-server1 controlcenter openldap
 do
@@ -18,7 +18,7 @@ do
 	# Create host keystore
 	keytool -genkey -noprompt \
 				 -alias $i \
-				 -dname "CN=$i,OU=TEST,O=CONFLUENT,L=PaloAlto,S=Ca,C=US" \
+				 -dname "CN=$i,OU=Support,O=EXAMPLE,L=MountainView,S=Ca,C=US" \
                                  -ext "SAN=dns:$i,dns:localhost" \
 				 -keystore $i.keystore.jks \
 				 -keyalg RSA \
@@ -30,7 +30,7 @@ do
         #openssl req -in $i.csr -text -noout
 
         # Sign the host certificate with the certificate authority (CA)
-        openssl x509 -req -CA snakeoil-ca-1.crt -CAkey snakeoil-ca-1.key -in $i.csr -out $i-ca1-signed.crt -days 9999 -CAcreateserial -passin pass:confluent -extensions v3_req -extfile <(cat <<EOF
+        openssl x509 -req -CA ca.crt -CAkey ca.key -in $i.csr -out $i-ca-signed.crt -days 9999 -CAcreateserial -passin pass:confluent -extensions v3_req -extfile <(cat <<EOF
 [req]
 distinguished_name = req_distinguished_name
 x509_extensions = v3_req
@@ -44,28 +44,22 @@ DNS.1 = $i
 DNS.2 = localhost
 EOF
 )
-        #openssl x509 -noout -text -in $i-ca1-signed.crt
 
         # Sign and import the CA cert into the keystore
-	keytool -noprompt -keystore $i.keystore.jks -alias CARoot -import -file snakeoil-ca-1.crt -storepass confluent -keypass confluent
-        #keytool -list -v -keystore kafka.$i.keystore.jks -storepass confluent
+	keytool -noprompt -keystore $i.keystore.jks -alias CARoot -import -file ca.crt -storepass confluent -keypass confluent
 
         # Sign and import the host certificate into the keystore
-	keytool -noprompt -keystore $i.keystore.jks -alias $i -import -file $i-ca1-signed.crt -storepass confluent -keypass confluent -ext "SAN=dns:$i,dns:localhost"
-        #keytool -list -v -keystore kafka.$i.keystore.jks -storepass confluent
+	keytool -noprompt -keystore $i.keystore.jks -alias $i -import -file $i-ca-signed.crt -storepass confluent -keypass confluent -ext "SAN=dns:$i,dns:localhost"
 
 	# Create truststore and import the CA cert
-	keytool -noprompt -keystore $i.truststore.jks -alias CARoot -import -file snakeoil-ca-1.crt -storepass confluent -keypass confluent
+	keytool -noprompt -keystore $i.truststore.jks -alias CARoot -import -file ca.crt -storepass confluent -keypass confluent
 
 	# Save creds
   	echo "confluent" > ${i}_sslkey_creds
   	echo "confluent" > ${i}_keystore_creds
   	echo "confluent" > ${i}_truststore_creds
 
-	# Create pem files and keys used for Schema Registry HTTPS testing
-	#   openssl x509 -noout -modulus -in client.certificate.pem | openssl md5
-	#   openssl rsa -noout -modulus -in client.key | openssl md5 
-    #   echo "GET /" | openssl s_client -connect localhost:8085/subjects -cert client.certificate.pem -key client.key -tls1
+	# Create pem files and keys 
 	keytool -export -alias $i -file $i.der -keystore $i.keystore.jks -storepass confluent
 	openssl x509 -inform der -in $i.der -out $i.certificate.pem
 	keytool -importkeystore -srckeystore $i.keystore.jks -destkeystore $i.keystore.p12 -deststoretype PKCS12 -deststorepass confluent -srcstorepass confluent -noprompt

@@ -45,7 +45,7 @@ do
 done
 echo
 echo "* Create datagen-user connector"
-curl --cacert ./secrets/snakeoil-ca-1.crt --key ./secrets/connect.key --cert ./secrets/connect-ca1-signed.crt -X POST -H "Content-Type: application/json" https://localhost:8083/connectors/ --data '{
+curl --cacert ./secrets/ca.crt --key ./secrets/connect.key --cert ./secrets/connect-ca-signed.crt -X POST -H "Content-Type: application/json" https://localhost:8083/connectors/ --data '{
   "name": "datagen-users", 
   "config": {
     "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector", 
@@ -69,10 +69,10 @@ curl --cacert ./secrets/snakeoil-ca-1.crt --key ./secrets/connect.key --cert ./s
 echo
 sleep 2
 echo "     Check status"
-curl --cacert ./secrets/snakeoil-ca-1.crt  https://localhost:8083/connectors/datagen-users/status
+curl --cacert ./secrets/ca.crt  https://localhost:8083/connectors/datagen-users/status
 echo 
 echo "* Create datagen-pageviews connector"
-curl --cacert ./secrets/snakeoil-ca-1.crt --key ./secrets/connect.key --cert ./secrets/connect-ca1-signed.crt -X POST -H "Content-Type: application/json" https://localhost:8083/connectors/ --data '{
+curl --cacert ./secrets/ca.crt --key ./secrets/connect.key --cert ./secrets/connect-ca-signed.crt -X POST -H "Content-Type: application/json" https://localhost:8083/connectors/ --data '{
   "name": "datagen-pageviews", 
   "config": {
     "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector", 
@@ -95,7 +95,7 @@ curl --cacert ./secrets/snakeoil-ca-1.crt --key ./secrets/connect.key --cert ./s
 echo
 sleep 2
 echo "     Check status"
-curl --cacert ./secrets/snakeoil-ca-1.crt  https://localhost:8083/connectors/datagen-pageviews/status
+curl --cacert ./secrets/ca.crt  https://localhost:8083/connectors/datagen-pageviews/status
 echo  
 echo
 echo ">> Check if ksqldb server is ready"
