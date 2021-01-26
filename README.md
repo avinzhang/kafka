@@ -16,4 +16,8 @@
   * zookeeper mtls
   * sasl_ssl_plain
     * sasl_ssl with plain for all components.  
+    * ldap enabled on port 9094 on broker
+      ```
+      kafka-topics --bootstrap-server localhost:9094 --command-config ./security/sasl_ssl_plain/client.properties --list
+      ```
     * C3 has ldap authentication

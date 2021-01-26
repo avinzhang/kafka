@@ -12,6 +12,8 @@ services:
         #-Djava.security.debug=all
 
   kafka:
+    ports:
+      - "9094:9094"
     volumes:
     - ./secrets:/etc/kafka/secrets
     environment:
