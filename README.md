@@ -14,3 +14,6 @@
     
 # Security:
   * zookeeper mtls
+  * sasl_ssl_plain
+    * sasl_ssl with plain for all components.  
+    * C3 has ldap authentication
