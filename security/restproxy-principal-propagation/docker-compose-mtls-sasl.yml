@@ -1,0 +1,22 @@
+---
+version: '3.4'
+services:
+  restproxy:
+    volumes:
+    - ./secrets:/etc/kafka/secrets
+    environment:
+      KAFKA_REST_LISTENERS: "https://0.0.0.0:8082"
+      KAFKA_REST_SSL_CLIENT_AUTH: 'true'
+      KAFKA_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/restproxy.truststore.jks
+      KAFKA_REST_SSL_TRUSTSTORE_PASSWORD: confluent
+      KAFKA_REST_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/restproxy.keystore.jks
+      KAFKA_REST_SSL_KEYSTORE_PASSWORD: confluent
+      KAFKA_REST_SSL_KEY_PASSWORD: confluent
+      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_REST_CLIENT_SASL_MECHANISM: PLAIN
+      KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="restproxy" password="restproxy";
+      KAFKA_REST_CONFLUENT_REST_AUTH_SSL_PRINCIPAL_MAPPING_RULES: RULE:^CN=([^,]*),.*$$/$$1/,DEFAULT
+      KAFKA_REST_KAFKA_REST_RESOURCE_EXTENSION_CLASS: io.confluent.kafkarest.security.KafkaRestSecurityResourceExtension
+      KAFKA_REST_LOG4J_LOGGERS: "io.confluent.rest-utils=DEBUG"
+      KAFKAREST_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/restproxy_jaas.conf
+       # -Djava.security.debug=all
