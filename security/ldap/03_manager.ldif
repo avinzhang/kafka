@@ -1,0 +1,5 @@
+dn: cn=Manager,ou=groups,{{ LDAP_BASE_DN }}
+objectClass: top
+objectClass: posixGroup
+cn: Manager
+gidNumber: 5001

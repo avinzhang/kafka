@@ -7,7 +7,8 @@ services:
     volumes:
       - $PWD/secrets:/etc/kafka/secrets
     environment:
-      ZOOKEEPER_SECURE_CLIENT_PORT: 2182
+      #zookeeper uses secure client port for ssl
+      ZOOKEEPER_SECURE_CLIENT_PORT: 2182  
       ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
       ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/zookeeper.truststore.jks
       ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: confluent
