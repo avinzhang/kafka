@@ -2,8 +2,6 @@
 version: '3.4'
 services:
   zookeeper:
-    ports:
-      - "2182:2182"
     volumes:
     - ./secrets:/etc/kafka/secrets
     environment:
@@ -62,9 +60,6 @@ services:
       KAFKA_LDAP_USER_NAME_ATTRIBUTE: uid
       KAFKA_LDAP_USER_OBJECT_CLASS: inetOrgPerson
        
-      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9093
       CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_SSL
       CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka;
       CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: PLAIN

@@ -1,0 +1,46 @@
+---
+version: '3.4'
+services:
+  zookeeper:
+    volumes:
+    - ./secrets:/etc/kafka/secrets
+    environment:
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+
+  kafka:
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLEAR:PLAINTEXT,INTERNAL:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: CLEAR://localhost:9092,INTERNAL://kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: CLEAR
+
+      KAFKA_LISTENER_NAME_INTERNAL_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_INTERNAL_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="kafka" \
+        password="kafka" \
+        user_kafka="kafka" \
+        user_restproxy="restproxy" \
+        user_client="client";
+
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka;
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: PLAIN
+
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
+
+  restproxy:
+    environment:
+      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_REST_CLIENT_SASL_MECHANISM: PLAIN
+      KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="restproxy" password="restproxy";
+      KAFKA_REST_CONFLUENT_REST_AUTH_PROPAGATE_METHOD: JETTY_AUTH
+      KAFKA_REST_AUTHENTICATION_METHOD: BASIC
+      KAFKA_REST_AUTHENTICATION_REALM: KafkaRest
+      KAFKA_REST_AUTHENTICATION_ROLES: admin
+      KAFKA_REST_KAFKA_REST_RESOURCE_EXTENSION_CLASS: io.confluent.kafkarest.security.KafkaRestSecurityResourceExtension
+      KAFKAREST_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/restproxy_jaas.conf
+    volumes:
+      - ./secrets:/etc/kafka/secrets
