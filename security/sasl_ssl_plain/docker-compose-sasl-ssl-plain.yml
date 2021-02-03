@@ -204,9 +204,9 @@ services:
                          #  -Djava.security.debug=all
   openldap:
     environment:
-      LDAP_TLS_CRT_FILENAME: openldap-ca1-signed.crt
+      LDAP_TLS_CRT_FILENAME: openldap-ca-signed.crt
       LDAP_TLS_KEY_FILENAME: openldap.key
-      LDAP_TLS_CA_CRT_FILENAME: snakeoil-ca-1.crt
+      LDAP_TLS_CA_CRT_FILENAME: ca.crt
       LDAP_TLS_VERIFY_CLIENT: try
       #LDAP_LOG_LEVEL: "-1"
     ports:
