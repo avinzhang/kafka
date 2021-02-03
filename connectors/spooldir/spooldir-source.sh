@@ -1,10 +1,11 @@
 #!/bin/bash
 
-TAG=6.0.1
+TAG=5.5.2
 
+CONNECTOR_VERSION=2.0.58
 
 echo "Download spool dir connector if it's not present"
-ls ./jar/jcustenborder-kafka-connect-spooldir/lib/kafka-connect-spooldir-*.jar || confluent-hub install  --component-dir ./jar jcustenborder/kafka-connect-spooldir:latest --no-prompt
+ls ./jar/jcustenborder-kafka-connect-spooldir/lib/kafka-connect-spooldir-$CONNECTOR_VERSION.jar || confluent-hub install  --component-dir ./jar jcustenborder/kafka-connect-spooldir:$CONNECTOR_VERSION --no-prompt
 echo "Done"
 
 
