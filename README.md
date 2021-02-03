@@ -24,3 +24,4 @@
   * restproxy-principal-propagation
     * restproxy-basic-to-sasl 
     * restproxy-mtls-to-sasl
+  * rbac 
