@@ -1,0 +1,337 @@
+#!/bin/bash
+
+TAG=6.0.1
+
+echo "----------Start Openldap---------"
+docker-compose up -d --build --no-deps openldap
+echo "Done"
+echo
+echo
+echo "----------Start zookeeper --------------"
+docker-compose -f docker-compose.yml -f ./security/sasl_ssl_plain/docker-compose-sasl-ssl-plain.yml up -d --build --no-deps zookeeper
+echo "Done"
+echo
+echo
+echo "----------Start brokers --------------"
+docker-compose -f docker-compose.yml -f ./security/rbac/docker-compose-rbac.yml up -d --build --no-deps kafka kafka1
+
+MDS_STARTED=false
+while [ $MDS_STARTED == false ]
+do
+    docker-compose logs kafka | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    if [ $? -eq 0 ]; then
+      MDS_STARTED=true
+      echo "MDS is started and ready"
+    else
+      echo "Waiting for MDS to start..."
+    fi
+    sleep 5
+done
+
+
+OUTPUT=$(
+  expect <<END
+    log_user 1
+    spawn confluent login --url https://localhost:8090 --ca-cert-path ./secrets/ca.crt
+    expect "Username: "
+    send "superUser\r";
+    expect "Password: "
+    send "superUser\r";
+    expect "Logged in as "
+    set result $expect_out(buffer)
+END
+)
+
+echo "$OUTPUT"
+
+  if [[ ! "$OUTPUT" =~ "Logged in as" ]]; then
+    echo "Failed to log into MDS.  Please check all parameters and run again"
+    exit 1
+  fi
+
+KAFKA_CLUSTER_ID=`curl -sik https://localhost:8090/v1/metadata/id |grep id |jq -r ".id"`
+if [ -z "$KAFKA_CLUSTER_ID" ]; then
+    echo "Failed to retrieve kafka cluster id from MDS"
+    exit 1
+fi
+echo "Cluster ID is $KAFKA_CLUSTER_ID"
+echo
+echo
+echo "----Setup Schema Registry ----"
+echo
+echo ">> Adding role binding for user schemaregistryUser"
+confluent iam rolebinding create \
+    --principal User:schemaregistryUser \
+    --role SecurityAdmin \
+    --kafka-cluster-id $KAFKA_CLUSTER_ID \
+    --schema-registry-cluster-id schema-registry
+
+confluent iam rolebinding create \
+    --principal User:schemaregistryUser \
+    --role ClusterAdmin \
+    --kafka-cluster-id $KAFKA_CLUSTER_ID
+
+confluent iam rolebinding create \
+    --principal User:schemaregistryUser \
+    --role DeveloperRead \
+    --resource Topic:_confluent-license \
+    --kafka-cluster-id $KAFKA_CLUSTER_ID
+
+confluent iam rolebinding create \
+    --principal User:schemaregistryUser \
+    --role DeveloperWrite \
+    --resource Topic:_confluent-license \
+    --kafka-cluster-id $KAFKA_CLUSTER_ID
+
+for resource in Topic:_schemas Group:schema-registry
+do
+    confluent iam rolebinding create \
+        --principal User:schemaregistryUser \
+        --role ResourceOwner \
+        --resource $resource \
+        --kafka-cluster-id $KAFKA_CLUSTER_ID
+done
+echo
+echo ">> Starting up schema registry"
+#docker-compose up -d --build --no-deps schemaregistry &>/dev/null
+docker-compose -f docker-compose.yml -f ./security/rbac/docker-compose-rbac.yml up -d --build --no-deps schemaregistry
+echo
+echo
+echo "-------------------------------------------------------------------"
+echo
+echo
+echo "----Setup Kafka Connect------------"
+echo
+echo ">> Download datagen connector"
+mkdir -p ./jar/datagen
+ls ./jar/datagen/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:$datagen_version --no-prompt
+echo "Done"
+echo ">> Download replicator connector"
+ls ./jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-6.0.1.jar || confluent-hub install --no-prompt --component-dir ./jar confluentinc/kafka-connect-replicator:6.0.1
+echo
+echo ">> Adding role binding for connectAdmin"
+confluent iam rolebinding create --principal User:connectAdmin --role SecurityAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
+# ResourceOwner for groups and topics on broker
+declare -a ConnectResources=(
+    "Topic:connect-configs"
+    "Topic:connect-offsets"
+    "Topic:connect-status"
+    "Group:connect-cluster"
+    "Topic:_confluent-monitoring"
+    "Topic:_confluent-secrets"
+    "Topic:_confluent-command"
+    "Group:secret-registry"
+)
+for resource in ${ConnectResources[@]}
+do
+    confluent iam rolebinding create \
+        --principal User:connectAdmin \
+        --role ResourceOwner \
+        --resource $resource \
+        --kafka-cluster-id $KAFKA_CLUSTER_ID
+done
+
+echo
+echo
+echo ">> Starting up Kafka connect"
+docker-compose -f docker-compose.yml -f ./security/rbac/docker-compose-rbac.yml up -d --build --no-deps connect
+echo
+echo
+CONNECT_STARTED=false
+while [ $CONNECT_STARTED == false ]
+do
+    docker-compose logs connect | grep "Herder started" &> /dev/null
+    if [ $? -eq 0 ]; then
+      CONNECT_STARTED=true
+      echo "Kafka connect is started and ready"
+    else
+      echo "Waiting for Kafka Connect..."
+    fi
+    sleep 5
+done
+
+echo ">> Add role binding for connectorUser for managing connectors"
+confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Connector:datagen-users --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
+confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Connector:datagen-pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
+
+confluent iam rolebinding create --principal User:connectorUser --role DeveloperWrite --resource Cluster:kafka-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID
+
+#confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Group:connect-datagen-users --kafka-cluster-id $KAFKA_CLUSTER_ID
+#confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Group:connect-datagen-pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID
+#for connector to access topic, subject
+confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Topic:users --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Topic:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Subject:users --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+confluent iam rolebinding create --principal User:connectorUser --role ResourceOwner --resource Subject:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+
+
+# User to check all connector status
+confluent iam rolebinding create --principal User:connectorViewer --role ResourceOwner --resource 'Connector:*' --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
+confluent iam rolebinding create --principal User:connectorViewer --role ResourceOwner --resource 'Topic:*' --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:connectorViewer --role ResourceOwner --resource 'Subject:*' --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry
+
+echo
+echo
+
+echo ">> Add connector: datagen-users"
+curl -i -X POST \
+    --cacert ./secrets/ca.crt \
+    -u connectorUser:connectorUser \
+    -H "Accept:application/json" \
+    -H  "Content-Type:application/json" \
+   https://localhost:8083/connectors/ -d '
+  {
+      "name": "datagen-users",
+      "config": {
+           "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+           "quickstart": "users",
+           "name": "datagen-users",
+           "kafka.topic": "users",
+           "max.interval": "1000",
+           "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+           "value.converter": "io.confluent.connect.avro.AvroConverter",
+           "value.converter.schema.registry.url": "https://schemaregistry:8081",
+           "value.converter.schema.registry.ssl.truststore.location": "/etc/kafka/secrets/connect.truststore.jks",
+           "value.converter.schema.registry.ssl.truststore.password": "confluent",
+           "value.converter.basic.auth.credentials.source": "USER_INFO",
+           "value.converter.basic.auth.user.info": "connectorUser:connectorUser",
+           "tasks.max": "1",
+           "iterations": "1000000000",
+           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username=\"connectorUser\" password=\"connectorUser\" metadataServerUrls=\"https://kafka:8090,https://kafka1:18090\";"
+       }
+   }'
+echo
+echo ">> Check connector status"
+echo "Datagen-users: `curl -s --cacert ./secrets/ca.crt -u connectorViewer:connectorViewer https://localhost:8083/connectors/datagen-users/status`"
+echo
+echo
+echo ">> Add connector: datagen-pageviews"
+curl -i -X POST \
+    --cacert ./secrets/ca.crt \
+    --cert ./secrets/connect.certificate.pem --key ./secrets/connect.key \
+    -u connectorUser:connectorUser \
+    -H "Accept:application/json" \
+    -H  "Content-Type:application/json" \
+   https://localhost:8083/connectors/ -d '
+  {
+      "name": "datagen-pageviews",
+      "config": {
+           "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+           "quickstart": "pageviews",
+           "name": "datagen-pageviews",
+           "kafka.topic": "pageviews",
+           "max.interval": "1000",
+           "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+           "value.converter": "io.confluent.connect.avro.AvroConverter",
+           "value.converter.schema.registry.url": "https://schemaregistry:8081",
+           "value.converter.schema.registry.ssl.truststore.location": "/etc/kafka/secrets/connect.truststore.jks",
+           "value.converter.schema.registry.ssl.truststore.password": "confluent",
+           "value.converter.basic.auth.credentials.source": "USER_INFO",
+           "value.converter.basic.auth.user.info": "connectorUser:connectorUser",
+           "tasks.max": "1",
+           "iterations": "1000000000",
+           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username=\"connectorUser\" password=\"connectorUser\" metadataServerUrls=\"https://kafka:8090,https://kafka1:18090\";"
+       }
+   }'
+
+echo
+echo ">> Check connector status"
+echo "Datagen-pageviews: `curl -s --cacert ./secrets/ca.crt -u connectorViewer:connectorViewer https://localhost:8083/connectors/datagen-pageviews/status`"
+echo
+echo
+echo
+echo "-----Setup ksqldb-----------"
+echo
+echo ">> Add role binding for ksqldb service principal"
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource KsqlCluster:ksql-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID --ksql-cluster-id ksql-cluster
+confluent iam rolebinding create --principal User:ksqlAdmin --role DeveloperWrite --resource Cluster:kafka-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role DeveloperRead --resource Group:_confluent-ksql-ksql-cluster --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Topic:_confluent-ksql-ksql-cluster --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Subject:_confluent-ksql-ksql-cluster --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Topic:_confluent-monitoring --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Topic:ksql-clusterksql_processing_log --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource TransactionalId:ksql-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role SecurityAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --ksql-cluster-id ksql-cluster
+
+
+echo
+echo ">> Start ksqldb server"
+docker-compose -f docker-compose.yml -f ./security/rbac/docker-compose-rbac.yml up -d --build --no-deps ksqldb-server
+echo
+echo
+echo "Add role binding for ksqlUser"
+confluent iam rolebinding create --principal User:ksqlUser --role DeveloperWrite --resource KsqlCluster:ksql-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID --ksql-cluster-id ksql-cluster
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Subject:users --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Subject:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Subject:users --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Subject:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Topic:users --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Topic:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Topic:users --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Topic:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:ksqlUser --role DeveloperRead --resource Topic:ksql-clusterksql_processing_log --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource TransactionalId:ksql-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Group:_confluent-ksql-ksql-cluster --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Topic:_confluent-ksql-ksql-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Subject:_confluent-ksql-ksql-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix --schema-registry-cluster-id schema-registry
+confluent iam rolebinding create --principal User:ksqlUser --role DeveloperWrite --resource Cluster:kafka-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role DeveloperWrite --resource Cluster:kafka-cluster --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlUser --role ResourceOwner --resource Topic:_confluent-ksql-ksql-clustertransient --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role ResourceOwner --resource Topic:_confluent-ksql-ksql-clustertransient --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rolebinding create --principal User:ksqlAdmin --role DeveloperRead --resource Subject:_confluent-ksql-ksql-cluster --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry
+
+
+
+
+echo "Waiting"
+KSQL_STARTED=false
+while [ $KSQL_STARTED == false ]
+do
+    docker-compose logs ksqldb-server | grep "Server up and running" &> /dev/null
+    if [ $? -eq 0 ]; then
+      KSQL_STARTED=true
+      echo "KSQLDB is started and ready"
+    else
+      echo "Waiting for KSQLDB to start..."
+    fi
+    sleep 5
+done
+echo
+
+echo
+docker-compose exec ksqldb-server bash -c "cat << EOF > /tmp/client.properties
+ssl.truststore.location=/etc/kafka/secrets/ksqldb-server.truststore.jks
+ssl.truststore.password=confluent
+EOF"
+
+echo "Start ksql streams and queries"
+docker-compose exec ksqldb-server bash -c "ksql --config-file /tmp/client.properties -u ksqlUser -p ksqlUser https://localhost:8088 <<EOF
+SET 'auto.offset.reset'='earliest';
+CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', VALUE_FORMAT='AVRO');
+CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
+CREATE STREAM pageviews_female with (KAFKA_TOPIC='pageviews_female') AS SELECT users.userid AS userid, pageid, regionid, gender FROM pageviews LEFT JOIN users ON pageviews.userid = users.userid WHERE gender = 'FEMALE';
+CREATE STREAM pageviews_female_like_89 WITH (kafka_topic='pageviews_enriched_r8_r9', value_format='AVRO') AS SELECT * FROM pageviews_female WHERE regionid LIKE '%_8' OR regionid LIKE '%_9';
+CREATE TABLE pageviews_regions WITH (kafka_topic='pageviews_regions', value_format='AVRO') AS SELECT gender, regionid , COUNT(*) AS numusers FROM pageviews_female WINDOW TUMBLING (size 30 second) GROUP BY gender, regionid HAVING COUNT(*) > 1;
+exit ;
+EOF"
+
+
+echo "---Setup role binding for c3Admin user for C3"
+confluent iam rolebinding create --principal User:c3Admin --role SystemAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID
+
+echo "Done"
+echo
+echo ">> start C3"
+docker-compose -f docker-compose.yml -f ./security/rbac/docker-compose-rbac.yml up -d --build --no-deps controlcenter
+echo
+
+echo ">> Add role binding for c3User -- c3User is Kafka ldap group"
+echo "   (all Operator role)"
+echo "   * Permission for Kafka cluster"
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator
+echo "   * Permission for Connect cluster"
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator --connect-cluster-id connect-cluster
+echo "   * Permission for schema registry"
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator --schema-registry-cluster-id schema-registry
+echo "   * Permission for ksqldb"
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator --ksql-cluster-id ksql-cluster
