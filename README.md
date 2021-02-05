@@ -11,6 +11,9 @@
   * spooldir-source
   * sqlserver
     * using jdbc source to sqlserver
+
+# ksqldb:
+  * ksql.sh - full cluster with ksql streams and tables 
     
 # Security:
   * zookeeper mtls
@@ -25,3 +28,4 @@
     * restproxy-basic-to-sasl 
     * restproxy-mtls-to-sasl
   * rbac 
+
