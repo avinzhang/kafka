@@ -12,6 +12,9 @@
   * sqlserver
     * using jdbc source to sqlserver
 
+# Cluster-linking:
+  * cluster-linking
+    
 # ksqldb:
   * ksql.sh - full cluster with ksql streams and tables 
     
