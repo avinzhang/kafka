@@ -15,7 +15,9 @@ echo
 echo
 echo "----Download a csv file-----"
 mkdir -p ./connectors/spooldir/data ./connectors/spooldir/error ./connectors/spooldir/finished 
-ls ./connectors/spooldir/data/csv-spooldir-source.tsv || curl "https://api.mockaroo.com/api/58605010?count=1000&key=25fd9c80" > "./connectors/spooldir/data/csv-spooldir-source.tsv" 
+rm ./connectors/spooldir/error/* 
+rm ./connectors/spooldir/finished/*
+curl "https://api.mockaroo.com/api/58605010?count=1000&key=25fd9c80" > "./connectors/spooldir/data/csv-spooldir-source.csv"
 echo
 echo  "---Start connect with spooldir volume---"
 docker-compose -f docker-compose.yml -f ./connectors/spooldir/docker-compose-spooldir.yml up -d --build --no-deps connect 
@@ -44,15 +46,15 @@ curl -i -X POST -H "Accept:application/json" \
             "tasks.max": 1,
             "connector.class": "com.github.jcustenborder.kafka.connect.spooldir.SpoolDirCsvSourceConnector",
             "input.path": "/spooldir/data",
-            "input.file.pattern": "csv-spooldir-source.tsv",
+            "input.file.pattern": "csv-spooldir-source.csv",
             "error.path": "/spooldir/error",
             "finished.path": "/spooldir/finished",
             "halt.on.error": "false",
             "schema.generation.enabled": "true",
             "topic": "spooldir-csv-topic",
             "csv.first.row.as.header": "true",
-            "key.converter": "org.apache.kafka.connect.storage.StringConverter", 
-            "value.converter": "io.confluent.connect.avro.AvroConverter", 
+            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+            "value.converter": "io.confluent.connect.avro.AvroConverter",
             "value.converter.schema.registry.url": "http://schemaregistry:8081"
         }
     }'
