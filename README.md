@@ -27,6 +27,8 @@
       kafka-topics --bootstrap-server localhost:9094 --command-config ./security/sasl_ssl_plain/client.properties --list
       ```
     * C3 has ldap authentication
+  * sasl_ssl_gssapi
+    * all components using gssapi including zookeeper
   * restproxy-principal-propagation
     * restproxy-basic-to-sasl 
     * restproxy-mtls-to-sasl
