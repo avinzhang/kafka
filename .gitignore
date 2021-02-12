@@ -9,3 +9,4 @@
 *.key
 *.keytab
 *.swp
+*.DS_Store
