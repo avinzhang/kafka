@@ -1,0 +1,9 @@
+---
+version: '3.4'
+services:
+  kafka:
+    ports:
+      - "9991:9991"
+    environment:
+      KAFKA_JMX_PORT: 9991
+      KAFKA_JMX_HOSTNAME: localhost

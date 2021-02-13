@@ -14,7 +14,10 @@
 
 # Cluster-linking:
   * cluster-linking
-    
+
+# jmx
+  * enabling jmx on broker, how to get jmx metrics
+
 # ksqldb:
   * ksql.sh - full cluster with ksql streams and tables 
     
