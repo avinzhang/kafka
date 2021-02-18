@@ -56,6 +56,15 @@ if [ -z "$KAFKA_CLUSTER_ID" ]; then
 fi
 echo "Cluster ID is $KAFKA_CLUSTER_ID"
 echo
+echo "Setup config file for token port"
+docker-compose exec kafka bash -c 'cat << EOF > /tmp/client-rbac.properties
+sasl.mechanism=OAUTHBEARER
+security.protocol=SASL_SSL
+ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
+ssl.truststore.password=confluent
+sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="normalUser" password="normalUser" metadataServerUrls="https://kafka:8090";
+EOF'
 echo
 echo "----Setup Schema Registry ----"
 echo
