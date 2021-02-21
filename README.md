@@ -12,6 +12,9 @@
   * sqlserver
     * using jdbc source to sqlserver
 
+# Confluent Cloud
+  * ccloud commands and how to
+
 # Cluster-linking:
   * cluster-linking
 
