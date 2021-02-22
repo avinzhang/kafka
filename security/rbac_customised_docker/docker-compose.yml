@@ -1,0 +1,157 @@
+version: '2.4'
+services:
+  openldap:
+    image: osixia/openldap:1.3.0
+    hostname: openldap
+    container_name: openldap
+    ports:
+        - 389:389
+    environment:
+        LDAP_ORGANISATION: "Example Inc."
+        LDAP_DOMAIN: "example.com"
+        LDAP_BASE_DN: "dc=example,dc=com"
+        # LDAP_LOG_LEVEL: "-1"
+    volumes:
+        - ./scripts/security/ldap_users:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: "--copy-service --loglevel info"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:$CP_VERSION
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+                  -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+                  -DrequireClientAuthScheme=sasl
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets
+      
+  kafka1:
+    build: 
+      context: ./kafka1
+      args:
+        tag: $CP_VERSION
+        repo: $kafka_repo
+    image: onprem/kafka1:$CP_VERSION
+    hostname: kafka1
+    container_name: kafka1
+    depends_on:
+      - zookeeper
+    ports:
+      - 18090:18090
+    environment:
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+                  -Djavax.net.ssl.trustStore=/etc/kafka/secrets/kafka1.truststore.jks
+                  -Djavax.net.ssl.trustStorePassword=confluent
+#                  -Djavax.net.debug=all
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets
+
+  kafka2:
+    build:
+      context: ./kafka2
+      args:
+        tag: $CP_VERSION
+        repo: $kafka_repo
+    image: onprem/kafka2:$CP_VERSION
+    hostname: kafka2
+    container_name: kafka2
+    depends_on:
+      - zookeeper
+    ports:
+      - 28090:28090
+    environment:
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+                  -Djavax.net.ssl.trustStore=/etc/kafka/secrets/kafka2.truststore.jks
+                  -Djavax.net.ssl.trustStorePassword=confluent
+#                  -Djavax.net.debug=all
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets
+
+
+  schemaregistry:
+    build: 
+      context: ./schema-registry
+      args:
+        tag: $CP_VERSION
+        repo: $kafka_repo
+    image: onprem/schemaregistry:$CP_VERSION
+    hostname: schemaregistry
+    container_name: schemaregistry
+    depends_on:
+      - kafka1
+    ports:
+      - 8081:8081
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets
+
+  connect:
+    build: 
+      context: ./connect
+      args:
+        tag: $CP_VERSION
+        repo: $kafka_repo
+    image: onprem/connect:$CP_VERSION
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - kafka1
+    ports:
+      - 8083:8083
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets 
+      - ./connect:/replicator
+    environment:
+      CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*'
+      CLASSPATH: '/usr/share/java/monitoring-interceptors/monitoring-interceptors-*.jar:/replicator/replicator-rest-extension-5.5.0.jar'
+      KAFKA_OPTS: -Djavax.net.ssl.trustStore=/etc/kafka/secrets/kafka.connect.truststore.jks
+                  -Djavax.net.ssl.trustStorePassword=confluent
+                  -Djavax.net.ssl.keyStore=/etc/kafka/secrets/kafka.connect.keystore.jks
+                  -Djavax.net.ssl.keyStorePassword=confluent
+
+  ksqldb-server:
+    build: 
+      context: ./ksqldb-server
+      args:
+        tag: $CP_VERSION
+        repo: $kafka_repo
+    image: onprem/ksqldb-server:$CP_VERSION
+    cpus: 0.5
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    depends_on:
+      - kafka1
+      - schemaregistry
+    ports:
+      - 8088:8088
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets
+      - ./scripts/ksqlclient.properties:/tmp/ksqlclient.properties
+    environment:
+      CUB_CLASSPATH: '/usr/share/java/ksql-server/*:/usr/share/java/cp-base-new/*'
+
+  controlcenter:
+    build: 
+      context: ./control-center
+      args:
+        tag: $CP_VERSION
+        repo: $kafka_repo
+    image: onprem/controlcenter:$CP_VERSION
+    hostname: controlcenter
+    container_name: controlcenter
+    depends_on:
+      - kafka1
+      - connect
+      - schemaregistry
+      - ksqldb-server
+    ports:
+      - 9021:9021
+      - 9022:9022
+    volumes:
+      - ./scripts/security:/etc/kafka/secrets
+

@@ -1,0 +1,6 @@
+dn: cn=Kafka,ou=groups,{{ LDAP_BASE_DN }}
+objectClass: top
+objectClass: posixGroup
+cn: Kafka
+gidNumber: 5002
+

@@ -39,4 +39,5 @@
     * restproxy-basic-to-sasl 
     * restproxy-mtls-to-sasl
   * rbac 
+  * rbac_customised_docker
 
