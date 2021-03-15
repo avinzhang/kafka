@@ -23,6 +23,9 @@
 
 # ksqldb:
   * ksql.sh - full cluster with ksql streams and tables 
+
+# zookeeper:
+  * multiple zookeepers
     
 # Security:
   * zookeeper mtls
