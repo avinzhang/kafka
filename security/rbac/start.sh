@@ -66,6 +66,22 @@ sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="normalUser" password="normalUser" metadataServerUrls="https://kafka:8090";
 EOF'
 echo
+echo "Setup config for mTls port"
+docker-compose exec kafka bash -c 'cat << EOF > /tmp/client-ssl.properties
+security.protocol=SSL
+ssl.keystore.location=/etc/kafka/secrets/client.keystore.jks
+ssl.keystore.password=confluent
+ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
+ssl.truststore.password=confluent
+ssl.key.password=confluent
+EOF'
+echo "client  user from client keystore has to be granted role bindings"
+confluent iam rolebinding create \
+    --principal User:client \
+    --role ResourceOwner \
+    --kafka-cluster-id $KAFKA_CLUSTER_ID \
+    --resource Topic:_confluent-license
+echo
 echo "----Setup Schema Registry ----"
 echo
 echo ">> Adding role binding for user schemaregistryUser"

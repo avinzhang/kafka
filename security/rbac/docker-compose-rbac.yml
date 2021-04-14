@@ -7,15 +7,18 @@ services:
     - ./secrets:/etc/kafka/secrets
     ports:
       - 8090:8090
+      - 9092:9092
+      - 9093:9093
+      - 9095:9095
     environment:
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLEAR:PLAINTEXT,TOKEN:SASL_SSL,INTERNAL:SASL_PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLEAR://localhost:9092,TOKEN://kafka:9093,INTERNAL://kafka:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLEAR:PLAINTEXT,TOKEN:SASL_SSL,INTERNAL:SASL_PLAINTEXT,SSL:SSL
+      KAFKA_ADVERTISED_LISTENERS: CLEAR://localhost:9092,TOKEN://kafka:9093,INTERNAL://kafka:9094,SSL://kafka:9095
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
       KAFKA_SUPER_USERS: User:superUser;User:metricsreporter;User:interbroker
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
-      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO,org.eclipse.jetty.server=DEBUG,io.confluent.rest-utils=DEBUG,io.confluent.rbacapi=DEBUG,io.confluent.tokenapi=DEBUG,io.confluent.security.auth=DEBUG,io.confluent.security.store=DEBUG,io.confluent.common.security.jetty=DEBUG,io.confluent.kafka.security.ldap.authorizer.LdapGroupManager=TRACE,io.confluent.security.auth.provider.ldap=TRACE"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=DEBUG,org.eclipse.jetty.server=DEBUG,io.confluent.rest-utils=DEBUG,io.confluent.rbacapi=DEBUG,io.confluent.tokenapi=DEBUG,io.confluent.security.auth=DEBUG,io.confluent.security.store=DEBUG,io.confluent.common.security.jetty=DEBUG,io.confluent.kafka.security.ldap.authorizer.LdapGroupManager=TRACE,io.confluent.security.auth.provider.ldap=TRACE"
 
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
       
@@ -39,6 +42,14 @@ services:
       KAFKA_LISTENER_NAME_TOKEN_SSL_KEY_PASSWORD: confluent
       KAFKA_LISTENER_NAME_TOKEN_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.truststore.jks
       KAFKA_LISTENER_NAME_TOKEN_SSL_TRUSTSTORE_PASSWORD: confluent
+
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka_sslkey_creds
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka_truststore_creds
+      KAFKA_SSL_PRINCIPAL_MAPPING_RULES: RULE:^CN=([a-zA-Z0-9.]*).*$$/$$1/ , DEFAULT
+      KAFKA_SSL_CLIENT_AUTH: required
 
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9094,kafka1:19094
       CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
@@ -165,13 +176,13 @@ services:
       - 18090:18090
     environment:
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLEAR:PLAINTEXT,TOKEN:SASL_SSL,INTERNAL:SASL_PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLEAR://localhost:19092,TOKEN://kafka1:19093,INTERNAL://kafka1:19094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLEAR:PLAINTEXT,TOKEN:SASL_SSL,INTERNAL:SASL_PLAINTEXT,SSL:SSL
+      KAFKA_ADVERTISED_LISTENERS: CLEAR://localhost:19092,TOKEN://kafka1:19093,INTERNAL://kafka1:19094,SSL://kafka1:19095
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
       KAFKA_SUPER_USERS: User:superUser;User:metricsreporter;User:interbroker
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
-      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO,org.eclipse.jetty.server=DEBUG,io.confluent.rest-utils=DEBUG,io.confluent.rbacapi=DEBUG,io.confluent.tokenapi=DEBUG,io.confluent.security.auth=DEBUG,io.confluent.security.store=DEBUG,io.confluent.common.security.jetty=DEBUG,io.confluent.kafka.security.ldap.authorizer.LdapGroupManager=TRACE,io.confluent.security.auth.provider.ldap=TRACE"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=DEBUG,org.eclipse.jetty.server=DEBUG,io.confluent.rest-utils=DEBUG,io.confluent.rbacapi=DEBUG,io.confluent.tokenapi=DEBUG,io.confluent.security.auth=DEBUG,io.confluent.security.store=DEBUG,io.confluent.common.security.jetty=DEBUG,io.confluent.kafka.security.ldap.authorizer.LdapGroupManager=TRACE,io.confluent.security.auth.provider.ldap=TRACE"
 
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
       
@@ -195,6 +206,14 @@ services:
       KAFKA_LISTENER_NAME_TOKEN_SSL_KEY_PASSWORD: confluent
       KAFKA_LISTENER_NAME_TOKEN_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka1.truststore.jks
       KAFKA_LISTENER_NAME_TOKEN_SSL_TRUSTSTORE_PASSWORD: confluent
+
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka1.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka1_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka1_sslkey_creds
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka1.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka1_truststore_creds
+      KAFKA_SSL_PRINCIPAL_MAPPING_RULES: RULE:^CN=([a-zA-Z0-9.]*).*$$/$$1/ , DEFAULT
+      KAFKA_SSL_CLIENT_AUTH: required
 
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9094,kafka1:19094
       CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
