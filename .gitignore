@@ -10,3 +10,4 @@
 *.keytab
 *.swp
 *.DS_Store
+jar/
