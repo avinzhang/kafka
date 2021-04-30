@@ -1,11 +1,10 @@
 #!/bin/bash
 
-TAG=6.0.1
+TAG=6.1.1
 datagen_version=latest
 
 echo "----Download datagen connector-----------"
-mkdir ./jar/datagen
-#confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:$datagen_version --no-prompt &>/dev/null
+mkdir -p ./jar/datagen
 ls ./jar/datagen/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:$datagen_version --no-prompt
 echo "Done"
 echo
