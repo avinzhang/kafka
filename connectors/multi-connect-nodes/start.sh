@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Start zookeeper, kafka, schema registry, 2 connect workers"
-docker-compose up -d --build --no-deps zookeeper kafka connect connect1 schemaregistry
+echo "Start 1 zookeeper, 3 brokers, schema registry, 2 connect workers"
+docker-compose up -d --build --no-deps zookeeper kafka kafka1 kafka2 connect connect1 schemaregistry
 
 
 echo "----Download datagen connector-----------"
