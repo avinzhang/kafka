@@ -1,0 +1,16 @@
+version: '3.4'
+services:
+  kafka1:
+    depends_on:
+      - zookeeper1
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:12181"
+
+  connect:
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./jar:/usr/share/java/jar
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka1:19093"
