@@ -38,6 +38,9 @@
       kafka-topics --bootstrap-server localhost:9094 --command-config ./security/sasl_ssl_plain/client.properties --list
       ```
     * C3 has ldap authentication
+
+    * docker-compose-sasl-ssl-plain-with-authorizer.yml uses simple acl authorizer 
+
   * sasl_ssl_gssapi
     * all components using gssapi including zookeeper
   * restproxy-principal-propagation
