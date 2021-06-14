@@ -14,7 +14,7 @@ docker-compose up -d --build --no-deps zookeeper kafka
 echo
 echo
 echo  "---Start destination cluster---"
-docker-compose -f docker-compose.yml -f ./connectors/replicator/docker-compose-replicator.yml up -d --build --no-deps zookeeper1 kafka1 connect
+docker-compose -f docker-compose.yml -f ./connectors/replicator/docker-compose-replicator.yml up -d --build --no-deps zookeeper1 kafka1 connect controlcenter
 echo
 connect_ready=false
 while [ $connect_ready == false ]
@@ -67,3 +67,6 @@ echo
 echo "Consume messages from destination cluster"
 kafka-console-consumer --bootstrap-server localhost:19092 --topic test --from-beginning --timeout-ms 5000 2> /dev/null
 
+
+# Check replicator metrics
+# curl http://localhost:8083/ReplicatorMetrics

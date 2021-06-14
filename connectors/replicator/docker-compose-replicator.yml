@@ -13,4 +13,13 @@ services:
     volumes:
       - ./jar:/usr/share/java/jar
     environment:
+      CLASSPATH: '/usr/share/java/jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-$TAG.jar'
       CONNECT_BOOTSTRAP_SERVERS: "kafka1:19093"
+      CONNECT_REST_EXTENSION_CLASSES: io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
+
+  controlcenter:
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka1:19093"
+    
