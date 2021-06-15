@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG=6.0.1
+TAG=6.1.1
 
 
 echo "Download couchbase connector"
