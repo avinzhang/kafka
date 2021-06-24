@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG=6.0.1
+TAG=5.5.1
 
 echo "----Download mysql java plugin-------"
 if [ ! -f ./jar/mysql-connector-java-8.0.22.jar ]
@@ -10,10 +10,10 @@ fi
 echo "Done"
 echo
 echo "---Download jdbc connector"
-ls ./jar/confluentinc-kafka-connect-jdbc/kafka-connect-jdbc-*.jar || confluent-hub install --component-dir ./jar --no-prompt confluentinc/kafka-connect-jdbc:10.0.1
+ls ./jar/confluentinc-kafka-connect-jdbc/lib/kafka-connect-jdbc-*.jar || confluent-hub install --component-dir ./jar --no-prompt confluentinc/kafka-connect-jdbc:10.0.1
 echo
 echo "----Start everything up--------------"
-docker-compose up -d --build --no-deps zookeeper kafka connect schemaregistry &>/dev/null
+docker-compose up -d --build --no-deps zookeeper kafka connect schemaregistry 
 echo
 echo "----Start mysql-----------"
 docker-compose up -d --build --no-deps mysql &>/dev/null
