@@ -19,7 +19,7 @@ echo "$OUTPUT"
     echo "Failed to log into MDS.  Please check all parameters and run again"
     exit 1
   fi
-
-KAFKA_CLUSTER_ID=$(curl -ik  https://localhost:8090/v1/metadata/id  &> /dev/null | grep id |jq -r ".id")
-echo $KAFKA_CLUSTER_ID
+echo
+KAFKA_CLUSTER_ID=$(curl -sk  https://localhost:8090/v1/metadata/id  | grep id |jq -r ".id")
 echo "Kafka cluster id is $KAFKA_CLUSTER_ID"
+

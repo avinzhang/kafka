@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG=6.0.1
+TAG=6.1.2
 
 echo "----------Start Openldap---------"
 docker-compose up -d --build --no-deps openldap
@@ -132,7 +132,7 @@ mkdir -p ./jar/datagen
 ls ./jar/datagen/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:$datagen_version --no-prompt
 echo "Done"
 echo ">> Download replicator connector"
-ls ./jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-6.0.1.jar || confluent-hub install --no-prompt --component-dir ./jar confluentinc/kafka-connect-replicator:6.0.1
+ls ./jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-*.jar || confluent-hub install --no-prompt --component-dir ./jar confluentinc/kafka-connect-replicator:latest
 echo
 echo ">> Adding role binding for connectAdmin"
 confluent iam rolebinding create --principal User:connectAdmin --role SecurityAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
