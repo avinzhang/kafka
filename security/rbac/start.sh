@@ -353,10 +353,10 @@ echo
 echo ">> Add role binding for c3User -- c3User is Kafka ldap group"
 echo "   (all Operator role)"
 echo "   * Permission for Kafka cluster"
-confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3User --role ClusterAdmin
 echo "   * Permission for Connect cluster"
-confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator --connect-cluster-id connect-cluster
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3User --role ClusterAdmin --connect-cluster-id connect-cluster
 echo "   * Permission for schema registry"
-confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator --schema-registry-cluster-id schema-registry
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3User --role ClusterAdmin --schema-registry-cluster-id schema-registry
 echo "   * Permission for ksqldb"
-confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:Developers --role Operator --ksql-cluster-id ksql-cluster
+confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3User --role ClusterAdmin --ksql-cluster-id ksql-cluster
