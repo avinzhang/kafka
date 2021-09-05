@@ -1,0 +1,12 @@
+dn: olcDatabase={1}{{ LDAP_BACKEND }},cn=config
+changetype: modify
+delete: olcAccess
+-
+add: olcAccess
+olcAccess: to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
+olcAccess: to attrs=userPassword,shadowLastChange by self write by dn="cn=admin,{{ LDAP_BASE_DN }}" write by anonymous auth by * none
+olcAccess: to * by self write by dn="cn=admin,{{ LDAP_BASE_DN }}" write by dn.children="cn=Manager,ou=groups,{{ LDAP_BASE_DN }}" write by users read by * none
+#olcAccess: to dn.base="{{ LDAP_BASE_DN }}"  by dn.base="cn=ldapAdmin,ou=users,{{ LDAP_BASE_DN }}" read
+#olcAccess: to dn.base="{{ LDAP_BASE_DN }}"  by dn.base="cn=ldapAdmin,ou=users,{{ LDAP_BASE_DN }}" search
+#olcAccess: to dn.one="cn=Developers,ou=groups,{{ LDAP_BASE_DN }}" by dn.base="cn=ldapAdmin,ou=users,{{ LDAP_BASE_DN }}" read
+#olcAccess: to dn.one="cn=Developers,ou=groups,{{ LDAP_BASE_DN }}" by dn.base="cn=ldapAdmin,ou=users,{{ LDAP_BASE_DN }}" search

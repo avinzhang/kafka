@@ -1,0 +1,20 @@
+dn: cn=Developers,ou=groups,{{ LDAP_BASE_DN }}
+changetype: modify
+add: memberuid
+memberuid: cn=superUser,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=mds,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=schemaregistryUser,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=restAdmin,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=connectAdmin,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=connectorUser,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=ksqlAdmin,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=ksqlUser,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=c3User,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=c3Admin,ou=users,{{ LDAP_BASE_DN }}
+memberuid: cn=normalUser,ou=users,{{ LDAP_BASE_DN }}
+
+dn: cn=Manager,ou=groups,{{ LDAP_BASE_DN }}
+changetype: modify
+add: memberuid
+memberuid: cn=ldapadmin,ou=users,{{ LDAP_BASE_DN }}
+

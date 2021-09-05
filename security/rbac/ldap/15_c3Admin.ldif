@@ -1,0 +1,15 @@
+dn: cn=c3Admin,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: c3Admin
+sn: Sheen
+givenName: c3Admin
+cn: c3Admin
+displayName: c3 admin
+uidNumber: 10051
+gidNumber: 5000
+userPassword: c3Admin
+gecos: c3Admin
+loginShell: /bin/bash
+homeDirectory: /home/c3Admin

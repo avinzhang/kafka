@@ -1,0 +1,15 @@
+dn: cn=connectorViewer,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: connectorViewer
+sn: Sheen
+givenName: connectorViewer
+cn: connectorViewer
+displayName: connector User viewonly
+uidNumber: 10033
+gidNumber: 5000
+userPassword: connectorViewer
+gecos: connectorViewer
+loginShell: /bin/bash
+homeDirectory: /home/connectorViewer

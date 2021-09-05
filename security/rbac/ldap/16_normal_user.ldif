@@ -1,0 +1,16 @@
+dn: cn=normalUser,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: normalUser
+sn: Sheen
+givenName: normalUser
+cn: normalUser
+displayName: c3 user
+uidNumber: 10009
+gidNumber: 5000
+userPassword: normalUser
+gecos: normalUser
+loginShell: /bin/bash
+homeDirectory: /home/normalUser
+memberOf: CN=Kafka,ou=groups,{{ LDAP_BASE_DN }}

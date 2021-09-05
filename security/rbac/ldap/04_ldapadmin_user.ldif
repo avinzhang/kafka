@@ -1,0 +1,15 @@
+dn: cn=ldapAdmin,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: ldapAdmin
+sn: ldapAdmin
+givenName: ldapAdmin
+cn: ldapAdmin
+displayName: ldapadmin Sheen
+uidNumber: 1001
+gidNumber: 5001
+userPassword: ldapAdmin
+gecos: ldapAdmin
+loginShell: /bin/bash
+homeDirectory: /home/ldapadmin
