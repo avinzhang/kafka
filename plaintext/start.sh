@@ -36,7 +36,6 @@ echo
 sleep 3
 echo "* Check connector status"
 echo "  datagen-users:  `curl -s http://localhost:8083/connectors/datagen-users/status | jq .connector.state`"
-echo
 echo "  datagen-pageviews:  `curl -s http://localhost:8083/connectors/datagen-pageviews/status | jq .connector.state`"
 
 echo
