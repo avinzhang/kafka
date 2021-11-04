@@ -1,0 +1,70 @@
+---
+metricbeat.max_start_delay: 10s
+
+metricbeat.modules:
+
+#- module: jolokia
+#  enabled: true
+#  metricsets: ["jmx"]
+#  period: 10s
+#  namespace: "metrics"
+#  hosts: ["kafka:8778/jolokia", "kafka1:8778/jolokia", "kafka2:8778/jolokia"]
+#  http_method: "GET"
+#  jmx.mappings:
+#    - mbean: 'kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions'
+#      attributes:
+#        - attr: Value
+#          field: Value
+#    - mbean: 'kafka.server:type=KafkaServer,name=BrokerState'
+#      attributes:
+#        - attr: Value
+#          field: Value
+#    - mbean: 'kafka.controller:type=KafkaController,name=ActiveControllerCount'
+#      attributes:
+#        - attr: Value
+#          field: Value
+#    - mbean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=Fetch'
+#      attributes:
+#        - attr: 99thPercentile
+#          field: Value
+#
+
+- module: zookeeper
+  enabled: true
+  period: 10s
+  metricsets:
+  - "mntr"
+  - "server"
+  hosts: ["zookeeper:2181", "zookeeper1:12181", "zookeeper2:22181"]
+
+- module: kafka
+  enabled: true
+  period: 10s
+  metricsets:
+  - "consumergroup"
+  - "partition"
+  - "broker"
+  - "consumer"
+  - "producer"
+  hosts: ["kafka:9092", "kafka1:19092", "kafka2:29092"]
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+
+
+setup.kibana:
+  host: "kibana:5601"
+
+#----------------------------- Dashboards -----------------------------
+# Control loading the sample dashboards to the Kibana index or not.
+setup.dashboards:
+  enabled: true
+#  directory: /dashboards
+
+logging.level: debug
+logging.to_files: false
+logging.to_syslog: true
+logging.files:
+  keepfiles: 3
+  permissions: 0644
