@@ -1,37 +1,19 @@
 version: "3.4"
 services:
-  zookeeper:
-    cpus: 0.7
-    image: confluentinc/cp-zookeeper:$TAG
-    hostname: zookeeper
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_INIT_LIMIT: 5
-      ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper:2888:3888;zookeeper1:12888:13888;zookeeper2:22888:23888
-      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
-    networks:
-      example.com: {}
-
   zookeeper1:
     cpus: 0.7
     image: confluentinc/cp-zookeeper:$TAG
     hostname: zookeeper1
     container_name: zookeeper1
     ports:
-      - "12181:12181"
+      - "1181:1181"
     environment:
-      ZOOKEEPER_SERVER_ID: 2
-      ZOOKEEPER_CLIENT_PORT: 12181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 1181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper:2888:3888;zookeeper1:12888:13888;zookeeper2:22888:23888
+      ZOOKEEPER_SERVERS: zookeeper1:1887:1888;zookeeper2:2887:2888;zookeeper3:3887:3888
       KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
     networks:
       example.com: {}
@@ -42,55 +24,33 @@ services:
     hostname: zookeeper2
     container_name: zookeeper2
     ports:
-      - "22181:22181"
+      - "2181:2181"
     environment:
-      ZOOKEEPER_SERVER_ID: 3
-      ZOOKEEPER_CLIENT_PORT: 22181
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper:2888:3888;zookeeper1:12888:13888;zookeeper2:22888:23888
+      ZOOKEEPER_SERVERS: zookeeper1:1887:1888;zookeeper2:2887:2888;zookeeper3:3887:3888
       KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
     networks:
       example.com: {}
 
-  kafka:
+  zookeeper3:
     cpus: 0.7
-    image: confluentinc/cp-server:$TAG
-    hostname: kafka
-    container_name: kafka
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper3
+    container_name: zookeeper3
     ports:
-      - "9092:9092"
-      - "9991:9991"
-    depends_on:
-      - zookeeper
-      - zookeeper1
-      - zookeeper2
+      - "3181:3181"
     environment:
-      KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181,zookeeper1:12181,zookeeper2:22181"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:9092,PLAINTEXT://kafka:9093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 2
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9093,kafka1:19093,kafka2:29093"
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 2
-      CONFLUENT_METRICS_ENABLE: 'false'
-      KAFKA_CONFLUENT_BALANCER_ENABLE: "true"
-      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
-      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
-      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
-      KAFKA_JMX_PORT: 9991
-      KAFKA_JMX_HOSTNAME: localhost
-      KAFKA_OPTS: -javaagent:/plugin/jolokia-jvm-1.7.0.jar=port=8778,host=0.0.0.0
-    volumes:
-      - ./plugin:/plugin
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 3181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:1887:1888;zookeeper2:2887:2888;zookeeper3:3887:3888
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
     networks:
       example.com: {}
 
@@ -100,17 +60,17 @@ services:
     hostname: kafka1
     container_name: kafka1
     ports:
-      - "19092:19092"
-      - "19991:19991"
+      - "1092:1092"
+      - "9991:9991"
     depends_on:
-      - zookeeper
       - zookeeper1
       - zookeeper2
+      - zookeeper3
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181,zookeeper1:12181,zookeeper2:22181"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1181,zookeeper2:2181,zookeeper3:3181,zookeeper4:4181,zookeeper5:5181,zookeeper6:6181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:19092,PLAINTEXT://kafka1:19093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:1092,PLAINTEXT://kafka1:1093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
@@ -119,7 +79,7 @@ services:
       KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9093,kafka1:19093,kafka2:29093"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka1:1093,kafka2:2093,kafka3:3093,kafka4:4093,kafka5:5093,kafka6:6093"
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 2
       CONFLUENT_METRICS_ENABLE: 'false'
       KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
@@ -140,17 +100,16 @@ services:
     hostname: kafka2
     container_name: kafka2
     ports:
-      - "29092:29092"
-      - "29991:29991"
+      - "2092:2092"
     depends_on:
-      - zookeeper
       - zookeeper1
       - zookeeper2
+      - zookeeper3
     environment:
       KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181,zookeeper1:12181,zookeeper2:22181"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1181,zookeeper2:2181,zookeeper3:3181,zookeeper4:4181,zookeeper5:5181,zookeeper6:6181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:29092,PLAINTEXT://kafka2:29093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:2092,PLAINTEXT://kafka2:2093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
@@ -159,7 +118,7 @@ services:
       KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka:9093,kafka1:19093,kafka2:29093"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka1:1093,kafka2:2093,kafka3:3093,kafka4:4093,kafka5:5093,kafka6:6093"
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 2
       CONFLUENT_METRICS_ENABLE: 'false'
       KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
@@ -167,6 +126,45 @@ services:
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
       KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
       KAFKA_JMX_PORT: 29991
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_OPTS: -javaagent:/plugin/jolokia-jvm-1.7.0.jar=port=8778,host=0.0.0.0
+    volumes:
+      - ./plugin:/plugin
+    networks:
+      example.com: {}
+
+  kafka3:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka3
+    container_name: kafka3
+    ports:
+      - "3092:3092"
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1181,zookeeper2:2181,zookeeper3:3181,zookeeper4:4181,zookeeper5:5181,zookeeper6:6181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:3092,PLAINTEXT://kafka3:3093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 2
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka1:1093,kafka2:2093,kafka3:3093,kafka4:4093,kafka5:5093,kafka6:6093"
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 2
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+      KAFKA_JMX_PORT: 39991
       KAFKA_JMX_HOSTNAME: localhost
       KAFKA_OPTS: -javaagent:/plugin/jolokia-jvm-1.7.0.jar=port=8778,host=0.0.0.0
     volumes:
