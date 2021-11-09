@@ -8,14 +8,14 @@ metricbeat.modules:
 #  metricsets: ["jmx"]
 #  period: 10s
 #  namespace: "metrics"
-#  hosts: ["kafka:8778/jolokia", "kafka1:8778/jolokia", "kafka2:8778/jolokia"]
+#  hosts: ["kafka3:8778/jolokia", "kafka1:8778/jolokia", "kafka2:8778/jolokia"]
 #  http_method: "GET"
 #  jmx.mappings:
-#    - mbean: 'kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions'
+#    - mbean: 'kafka.server:type=KafkaServer,name=BrokerState'
 #      attributes:
 #        - attr: Value
 #          field: Value
-#    - mbean: 'kafka.server:type=KafkaServer,name=BrokerState'
+#    - mbean: 'kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions'
 #      attributes:
 #        - attr: Value
 #          field: Value
@@ -27,26 +27,38 @@ metricbeat.modules:
 #      attributes:
 #        - attr: 99thPercentile
 #          field: Value
+
+- module: jolokia
+  enabled: true
+  metricsets: ["jmx"]
+  period: 10s
+  namespace: "metrics"
+  hosts: ["kafka-producer:8779/jolokia"]
+  http_method: "GET"
+  jmx.mappings:
+    - mbean: 'kafka.producer:type=producer-metrics,client-id=console-producer'
+      attributes:
+        - attr: batch-size-avg
+          field: Value
+
+#- module: zookeeper
+#  enabled: true
+#  period: 10s
+#  metricsets:
+#  - "mntr"
+#  - "server"
+#  hosts: ["zookeeper1:1181", "zookeeper2:2181", "zookeeper3:3181"]
 #
-
-- module: zookeeper
-  enabled: true
-  period: 10s
-  metricsets:
-  - "mntr"
-  - "server"
-  hosts: ["zookeeper1:1181", "zookeeper2:2181", "zookeeper3:3181"]
-
-- module: kafka
-  enabled: true
-  period: 10s
-  metricsets:
-  - "consumergroup"
-  - "partition"
-  - "broker"
-  - "consumer"
-  - "producer"
-  hosts: ["kafka1:1092", "kafka2:2092", "kafka3:3092"]
+#- module: kafka
+#  enabled: true
+#  period: 10s
+#  metricsets:
+#  - "consumergroup"
+#  - "partition"
+#  - "broker"
+#  - "consumer"
+#  - "producer"
+#  hosts: ["kafka1:1092", "kafka2:2092", "kafka3:3092"]
 
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
@@ -59,7 +71,7 @@ setup.kibana:
 #----------------------------- Dashboards -----------------------------
 # Control loading the sample dashboards to the Kibana index or not.
 setup.dashboards:
-  enabled: true
+  enabled: false
 #  directory: /dashboards
 
 logging.level: debug
