@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=6.1.2
+export TAG=6.2.1
 
 echo "----------Start Openldap---------"
 docker-compose up -d --build --no-deps openldap
@@ -8,14 +8,14 @@ echo "Done"
 echo
 echo
 echo "----------Start zookeeper and broker -------------"
-docker-compose up -d --build --no-deps zookeeper zookeeper1 zookeeper2 kafka kafka1 kafka2
+docker-compose up -d --build --no-deps zookeeper3 zookeeper1 zookeeper2 kafka3 kafka1 kafka2
 echo "Done"
 echo
 echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker-compose logs kafka | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    docker-compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
     if [ $? -eq 0 ]; then
       MDS_STARTED=true
       echo "MDS is started and ready"
@@ -29,7 +29,7 @@ done
 OUTPUT=$(
   expect <<END
     log_user 1
-    spawn confluent login --url https://localhost:8090 --ca-cert-path ./secrets/ca.crt
+    spawn confluent login --url https://localhost:1090 --ca-cert-path ./secrets/ca.crt
     expect "Username: "
     send "superUser\r";
     expect "Password: "
@@ -46,7 +46,7 @@ echo "$OUTPUT"
     exit 1
   fi
 
-KAFKA_CLUSTER_ID=`curl -sik https://localhost:8090/v1/metadata/id |grep id |jq -r ".id"`
+KAFKA_CLUSTER_ID=`curl -sik https://localhost:1090/v1/metadata/id |grep id |jq -r ".id"`
 if [ -z "$KAFKA_CLUSTER_ID" ]; then
     echo "Failed to retrieve kafka cluster id from MDS"
     exit 1
@@ -54,17 +54,17 @@ fi
 echo "Cluster ID is $KAFKA_CLUSTER_ID"
 echo
 echo "Setup config file for token port"
-docker-compose exec kafka bash -c 'cat << EOF > /tmp/client-rbac.properties
+docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/client-rbac.properties
 sasl.mechanism=OAUTHBEARER
 security.protocol=SASL_SSL
 ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
 ssl.truststore.password=confluent
 sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
-sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="normalUser" password="normalUser" metadataServerUrls="https://kafka:8090";
+sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="normalUser" password="normalUser" metadataServerUrls="https://kafka1:1090,https://kafka2:2090";
 EOF'
 echo
 echo "Setup config for mTls port"
-docker-compose exec kafka bash -c 'cat << EOF > /tmp/client-ssl.properties
+docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/client-ssl.properties
 security.protocol=SSL
 ssl.keystore.location=/etc/kafka/secrets/client.keystore.jks
 ssl.keystore.password=confluent
@@ -221,7 +221,7 @@ curl -i -X POST \
            "value.converter.basic.auth.user.info": "connectorUser:connectorUser",
            "tasks.max": "1",
            "iterations": "1000000000",
-           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username=\"connectorUser\" password=\"connectorUser\" metadataServerUrls=\"https://kafka:8090,https://kafka1:18090\";"
+           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username=\"connectorUser\" password=\"connectorUser\" metadataServerUrls=\"https://kafka1:1090,https://kafka2:2090\";"
        }
    }'
 echo
@@ -254,7 +254,7 @@ curl -i -X POST \
            "value.converter.basic.auth.user.info": "connectorUser:connectorUser",
            "tasks.max": "1",
            "iterations": "1000000000",
-           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username=\"connectorUser\" password=\"connectorUser\" metadataServerUrls=\"https://kafka:8090,https://kafka1:18090\";"
+           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username=\"connectorUser\" password=\"connectorUser\" metadataServerUrls=\"https://kafka2:2090,https://kafka1:1090\";"
        }
    }'
 
@@ -347,7 +347,7 @@ CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (
 CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
 CREATE STREAM pageviews_female with (KAFKA_TOPIC='pageviews_female') AS SELECT users.userid AS userid, pageid, regionid, gender FROM pageviews LEFT JOIN users ON pageviews.userid = users.userid WHERE gender = 'FEMALE';
 CREATE STREAM pageviews_female_like_89 WITH (kafka_topic='pageviews_enriched_r8_r9', value_format='AVRO') AS SELECT * FROM pageviews_female WHERE regionid LIKE '%_8' OR regionid LIKE '%_9';
-CREATE TABLE pageviews_regions WITH (kafka_topic='pageviews_regions', value_format='AVRO') AS SELECT gender, regionid , COUNT(*) AS numusers FROM pageviews_female WINDOW TUMBLING (size 30 second) GROUP BY gender, regionid HAVING COUNT(*) > 1;
+CREATE TABLE pageviews_regions WITH (kafka_topic='pageviews_regions', value_format='AVRO', KEY_FORMAT='avro') AS SELECT gender, regionid , COUNT(*) AS numusers FROM pageviews_female WINDOW TUMBLING (size 30 second) GROUP BY gender, regionid HAVING COUNT(*) > 1;
 exit ;
 EOF"
 
