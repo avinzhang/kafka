@@ -101,12 +101,12 @@
   kubectl config delete-context xxxx
   ```
 
-# Find the current CFK version from helm repo
-  * Latest 
+# Install a specific version of CFK
+  * Latest version from helm repo
   ```
   helm search repo confluentinc/confluent-for-kubernetes
   ```
-  * All available
+  * All available versions
   ```
   helm search repo -l confluentinc/confluent-for-kubernetes
   ```
