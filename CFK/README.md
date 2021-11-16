@@ -34,7 +34,7 @@
     eksctl delete cluster --name avin-eks-cluster
     ```
 
-  *  AKS
+  * AKS
     * Install azure cli
     ```
     brew install azure-cli
@@ -60,7 +60,7 @@
     az aks delete --name avin-aks-cluster --resource-group avingroup
     ```
 
-  *  GKE 
+  * GKE 
     * Install gcloud cli
     ```
     brew install --cask google-cloud-sdk
