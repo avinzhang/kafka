@@ -309,6 +309,7 @@ services:
       KAFKA_REST_ID: rest_proxy
       KAFKA_REST_HOST_NAME: restproxy
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
+      KAFKA_REST_REJECT_OPTIONS_REQUEST: 'true'
     networks:
       example.com: {}
 
