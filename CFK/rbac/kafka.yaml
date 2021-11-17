@@ -28,7 +28,7 @@ spec:
 #      externalAccess:
 #        type: loadBalancer
 #        loadBalancer:
-#          domain: gcp.azhang.rocks
+#          domain: mydomain
 #          brokerPrefix: rb
 #          bootstrapPrefix: rb
       tls:

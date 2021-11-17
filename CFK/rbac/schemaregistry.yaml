@@ -14,7 +14,7 @@ spec:
 #  externalAccess:
 #    type: loadBalancer
 #    loadBalancer:
-#      domain: gcp.azhang.rocks
+#      domain: my.domain
 #      prefix: rb-sr
   authorization:
     type: rbac
