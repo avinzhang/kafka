@@ -1,0 +1,124 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-zookeeper:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  #license:
+  #  globalLicense: true
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-server:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+  configOverrides:
+    server:
+      - auto.create.topics.enable=true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 1
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: nivavin/cp-server-connect-with-datagen:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 1
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-ksqldb-server:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  configOverrides:
+    server:
+      - ksql.schema.registry.url=http://schemaregistry:8081
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-enterprise-control-center:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+    - name: ksqldb
+      url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+    - name: connect
+      url: http://connect.confluent.svc.cluster.local:8083
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-schema-registry:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
