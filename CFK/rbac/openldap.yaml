@@ -1,0 +1,363 @@
+# Default values for openldap.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+logLevel: trace
+# Define deployment strategy - IMPORTANT: use rollingUpdate: null when use Recreate strategy.
+# It prevents from merging with existing map keys which are forbidden.
+strategy: {}
+  # type: RollingUpdate
+  # rollingUpdate:
+  #   maxSurge: 1
+  #   maxUnavailable: 0
+  #
+  # or
+  #
+  # type: Recreate
+  # rollingUpdate: null
+image:
+  # From repository https://github.com/osixia/docker-openldap
+  repository: osixia/openldap
+  tag: 1.4.0
+  pullPolicy: IfNotPresent
+
+# Spcifies an existing secret to be used for admin and config user passwords
+existingSecret: ""
+
+# settings for enabling TLS
+tls:
+  enabled: false
+  secret: ""  # The name of a kubernetes.io/tls type secret to use for TLS
+  CA:
+    enabled: false
+    secret: ""  # The name of a generic secret to use for custom CA certificate (ca.crt)
+## Add additional labels to all resources
+extraLabels: {}
+## Add additional annotations to pods
+podAnnotations: {}
+service:
+  annotations: {}
+  clusterIP: ""
+
+  ldapPort: 389
+  sslLdapPort: 636  # Only used if tls.enabled is true
+  ## List of IP addresses at which the service is available
+  ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+  ##
+  externalIPs: []
+
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  type: ClusterIP
+
+# Default configuration for openldap as environment variables. These get injected directly in the container.
+# Use the env variables from https://github.com/osixia/docker-openldap#beginner-guide
+env:
+  LDAP_ORGANISATION: "Example Inc."
+  LDAP_DOMAIN: "example.com"
+  LDAP_BACKEND: "mdb"
+  LDAP_TLS: "true"
+  LDAP_TLS_ENFORCE: "false"
+  LDAP_TLS_VERIFY_CLIENT: "try"
+  LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+
+# Default Passwords to use, stored as a secret. If unset, passwords are auto-generated.
+# You can override these at install time with
+# helm install openldap --set openldap.adminPassword=<passwd>,openldap.configPassword=<passwd>
+adminPassword: admin
+configPassword: config
+
+# Custom openldap configuration files used to override default settings
+# customLdifFiles:
+  # 01-default-users.ldif: |-
+    # Predefine users here
+customLdifFiles:
+  01_base.ldif: |-
+    dn: ou=users,dc=example,dc=com
+    objectClass: organizationalUnit
+    ou: Users
+
+    dn: ou=groups,dc=example,dc=com
+    objectClass: organizationalUnit
+    ou: Groups
+  02-developers.ldif: |-
+    dn: cn=Developers,ou=groups,dc=example,dc=com
+    objectClass: top
+    objectClass: posixGroup
+    cn: Developers
+    gidNumber: 5000
+  03-kafka.ldif: |-
+    dn: cn=Kafka,ou=groups,dc=example,dc=com
+    objectClass: top
+    objectClass: posixGroup
+    cn: Kafka
+    gidNumber: 5001
+  04-default-users.ldif: |-
+    dn: cn=superuser,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: superuser
+    sn: Superuser
+    givenName: Test
+    cn: superuser
+    displayName: super user
+    uidNumber: 10000
+    gidNumber: 5000
+    userPassword: superuser
+    gecos: superuser
+    loginShell: /bin/bash
+    homeDirectory: /home/superuser
+
+    dn: cn=mds,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: mds
+    sn: MDS
+    cn: mds
+    displayName: M DS
+    uidNumber: 10001
+    gidNumber: 5000
+    userPassword: mds
+    gecos: mds
+    loginShell: /bin/bash
+    homeDirectory: /home/mds
+
+    dn: cn=kafka,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: kafka
+    sn: KAFKA
+    cn: kafka
+    uidNumber: 10002
+    gidNumber: 5000
+    userPassword: kafka
+    gecos: kafka
+    loginShell: /bin/bash
+    homeDirectory: /home/kafka
+
+    dn: cn=proxyuser,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: proxyuser
+    sn: proxyuser
+    cn: proxyuser
+    uidNumber: 10003
+    gidNumber: 5000
+    userPassword: proxyuser
+    gecos: proxyuser
+    loginShell: /bin/bash
+    homeDirectory: /home/proxyuser
+
+    dn: cn=schemaregistry,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: schemaregistry
+    sn: Schemaregistry
+    cn: schemaregistry
+    uidNumber: 10011
+    gidNumber: 5000
+    userPassword: schemaregistry
+    gecos: schemaregistry
+    loginShell: /bin/bash
+    homeDirectory: /home/schemaregistry
+
+    dn: cn=schemaregistryuser,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: schemaregistryuser
+    sn: Schemaregistryuser
+    cn: schemaregistryuser
+    uidNumber: 10012
+    gidNumber: 5000
+    userPassword: schemaregistryuser
+    gecos: schemaregistryuser
+    loginShell: /bin/bash
+    homeDirectory: /home/schemaregistryuser
+
+
+    dn: cn=connect,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: connect
+    sn: Connect
+    cn: connect
+    uidNumber: 10020
+    gidNumber: 5000
+    userPassword: connect
+    gecos: connect
+    loginShell: /bin/bash
+    homeDirectory: /home/connect
+
+    dn: cn=connectuser,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: connectuser
+    sn: Connectuser
+    cn: connectuser
+    uidNumber: 10021
+    gidNumber: 5000
+    userPassword: connectuser
+    gecos: connectuser
+    loginShell: /bin/bash
+    homeDirectory: /home/connectuser
+
+
+    dn: cn=connectviewer,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: connectviewer
+    sn: Connectviewer
+    cn: connectviewer
+    uidNumber: 10022
+    gidNumber: 5000
+    userPassword: connectviewer
+    gecos: connectviewer
+    loginShell: /bin/bash
+    homeDirectory: /home/connectviewer
+
+    dn: cn=ksql,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: ksql
+    sn: Ksql
+    cn: ksql
+    uidNumber: 10030
+    gidNumber: 5000
+    userPassword: ksql
+    gecos: ksql
+    loginShell: /bin/bash
+    homeDirectory: /home/ksql
+
+    dn: cn=ksqluser,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: ksqluser
+    sn: Ksqluser
+    cn: ksqluser
+    uidNumber: 10031
+    gidNumber: 5000
+    userPassword: ksqluser
+    gecos: ksql
+    loginShell: /bin/bash
+    homeDirectory: /home/ksqluser
+
+    dn: cn=controlcenter,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: controlcenter
+    sn: Controlcenter
+    cn: controlcenter
+    uidNumber: 10040
+    gidNumber: 5000
+    userPassword: controlcenter
+    gecos: controlcenter
+    loginShell: /bin/bash
+    homeDirectory: /home/controlcenter
+
+    dn: cn=user1,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: user1
+    sn: User1
+    cn: user1
+    uidNumber: 10050
+    gidNumber: 5000
+    userPassword: user1
+    gecos: user1
+    loginShell: /bin/bash
+    homeDirectory: /home/user1
+
+    dn: cn=user2,ou=users,dc=example,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: user2
+    sn: User2
+    cn: user2
+    uidNumber: 10051
+    gidNumber: 5000
+    userPassword: user2
+    gecos: user2
+    loginShell: /bin/bash
+    homeDirectory: /home/user2
+  20_group_add.ldif: |-
+    dn: cn=Developers,ou=groups,dc=example,dc=com
+    changetype: modify
+    add: memberuid
+    memberuid: cn=superuser,ou=users,dc=example,dc=com
+    memberuid: cn=mds,ou=users,dc=example,dc=com
+    memberuid: cn=kafka,ou=users,dc=example,dc=com
+    memberuid: cn=proxyuser,ou=users,dc=example,dc=com
+    memberuid: cn=schemaregistry,ou=users,dc=example,dc=com
+    memberuid: cn=schemaregistryuser,ou=users,dc=example,dc=com
+    memberuid: cn=ksql,ou=users,dc=example,dc=com
+    memberuid: cn=ksqluser,ou=users,dc=example,dc=com
+    memberuid: cn=connect,ou=users,dc=example,dc=com
+    memberuid: cn=connectuser,ou=users,dc=example,dc=com
+    memberuid: cn=connectviewer,ou=users,dc=example,dc=com
+    memberuid: cn=controlcenter,ou=users,dc=example,dc=com
+    memberuid: cn=user1,ou=users,dc=example,dc=com
+  21_index_add.ldif: |-
+    dn: olcDatabase={1}mdb,cn=config
+    changetype: modify
+    add: olcDbIndex
+    olcDbIndex: memberuid eq
+
+## Persist data to a persistent volume
+persistence:
+  enabled: false
+  ## database data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 8Gi
+  # existingClaim: ""
+
+resources: {}
+ # requests:
+ #   cpu: "100m"
+ #   memory: "256Mi"
+ # limits:
+ #   cpu: "500m"
+ #   memory: "512Mi"
+
+initResources: {}
+ # requests:
+ #   cpu: "100m"
+ #   memory: "128Mi"
+ # limits:
+ #   cpu: "100m"
+ #   memory: "128Mi"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+## test container details
+test:
+  enabled: false
+  image:
+    repository: dduportal/bats
+    tag: 0.4.0
+
