@@ -1,0 +1,26 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: nivavin/cp-server-connect-with-datagen:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  tls:
+    secretRef: tls-connect 
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      tls:
+        enabled: true
+
+
+
