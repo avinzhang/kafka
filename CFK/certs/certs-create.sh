@@ -13,7 +13,7 @@ ns=confluent
 # Generate CA key
 openssl req -new -x509 -keyout ca.key -out ca.crt -days 365 -subj '/CN=ca.test.confluent.io/OU=TEST/O=CONFLUENT/L=MountainView/S=Ca/C=US' -passin pass:confluent -passout pass:confluent
 
-for i in kafka schemaregistry restproxy connect replicator zookeeper controlcenter ksql openldap client
+for i in kafka schemaregistry restproxy connect replicator zookeeper controlcenter ksqldb openldap client
 do
 	# Create host keystore
 	keytool -genkey -noprompt \
@@ -47,7 +47,7 @@ DNS.4 = *.svc.cluster.local
 DNS.5 = *.$ns.svc.cluster.local
 DNS.6 = *.kafka.$ns.svc.cluster.local
 DNS.7 = *.$i.$ns.svc.cluster.local
-
+DNS.8 = $i.mycfk.com
 
 EOF
 )
