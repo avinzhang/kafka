@@ -232,7 +232,7 @@ kubectl wait --for=condition=Ready pod/controlcenter-0 --timeout=600s
 echo "Completed"
 echo 
 echo "Install ingress services"
-kubectl apply -f ./ingress-host-based-v1.yaml
+kubectl apply -f ./ingress-hostbased-v1.yaml
 echo
 echo "----Start nginix ingress controller---------------------"
 helm upgrade --install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true --set controller.extraArgs.enable-ssl-passthrough="true"

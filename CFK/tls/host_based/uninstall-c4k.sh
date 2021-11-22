@@ -12,7 +12,7 @@ sleep 30
 
 kubectl delete secret tls-zookeeper tls-kafka tls-schemaregistry tls-connect tls-ksqldb tls-controlcenter
 
-kubectl delete -f ./ingress-host-based-v1.yaml
+kubectl delete -f ./ingress-hostbased-v1.yaml
 sleep 10 
 helm uninstall confluent-operator
 
