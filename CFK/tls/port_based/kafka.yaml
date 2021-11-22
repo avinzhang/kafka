@@ -1,0 +1,77 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-server:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  listeners:
+    internal:
+      tls:
+        enabled: true
+    external:
+      tls: 
+        enabled: true
+      externalAccess:
+        type: staticForPortBasedRouting
+        staticForPortBasedRouting:
+          portOffset: 9094
+          host: broker.mycfk.com
+  metricReporter:
+    enabled: true
+    bootstrapEndpoint: kafka:9071
+    tls:
+      enabled: true
+  configOverrides:
+    server:
+      - confluent.balancer.heal.uneven.load.trigger=ANY_UNEVEN_LOAD
+      - auto.create.topics.enable=true
+    log4j:
+      - log4j.logger.kafka.authorizer.logger=INFO, stdout
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      tls:
+        enabled: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    platform.confluent.io/cr-name: kafka
+    platform.confluent.io/namespace: confluent
+    platform.confluent.io/type: kafka
+    prometheus.io/port: "7778"
+    prometheus.io/scrape: "true"
+  name: kafka-bootstrap
+  namespace: confluent
+  labels:
+    confluent-platform: "true"
+    cr-name: kafka
+    type: kafka
+spec:
+  ports:
+    - name: external
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+  selector:
+    app: kafka
+    clusterId: confluent
+    confluent-platform: "true"
+    type: kafka
+  sessionAffinity: None
+  type: ClusterIP
