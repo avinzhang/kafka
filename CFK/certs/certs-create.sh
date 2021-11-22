@@ -18,7 +18,7 @@ do
 	# Create host keystore
 	keytool -genkey -noprompt \
 				 -alias $i \
-				 -dname "CN=$cn,OU=TEST,O=CONFLUENT,L=MountainView,S=Ca,C=US" \
+				 -dname "CN=$i,OU=TEST,O=CONFLUENT,L=MountainView,S=Ca,C=US" \
                                  -ext "SAN=dns:$i,dns:localhost" \
 				 -keystore $i.keystore.jks \
 				 -keyalg RSA \
@@ -28,15 +28,13 @@ do
 	# Create the certificate signing request (CSR)
 	keytool -keystore $i.keystore.jks -alias $i -certreq -file $i.csr -storepass confluent -keypass confluent -ext "SAN=dns:$i,dns:localhost"
         #openssl req -in $i.csr -text -noout
-if [ $i == "kafka" ]
-then
   openssl x509 -req -CA ca.crt -CAkey ca.key -in $i.csr -out $i-ca1-signed.crt -days 9999 -CAcreateserial -passin pass:confluent -extensions v3_req -extfile <(cat <<EOF
 [req]
 distinguished_name = req_distinguished_name
 x509_extensions = v3_req
 prompt = no
 [req_distinguished_name]
-CN = $cn
+CN = $i
 [v3_req]
 subjectAltName = @alt_names
 [alt_names]
@@ -47,37 +45,10 @@ DNS.4 = *.svc.cluster.local
 DNS.5 = *.$ns.svc.cluster.local
 DNS.6 = *.kafka.$ns.svc.cluster.local
 DNS.7 = *.$i.$ns.svc.cluster.local
-DNS.8 = $i.mycfk.com
-DNS.9 = b0.mycfk.com
-DNS.10 = b1.mycfk.com
-DNS.11 = b2.mycfk.com
+DNS.8 = *.mycfk.com
 
 EOF
 )
-else
-        # Sign the host certificate with the certificate authority (CA)
-        openssl x509 -req -CA ca.crt -CAkey ca.key -in $i.csr -out $i-ca1-signed.crt -days 9999 -CAcreateserial -passin pass:confluent -extensions v3_req -extfile <(cat <<EOF
-[req]
-distinguished_name = req_distinguished_name
-x509_extensions = v3_req
-prompt = no
-[req_distinguished_name]
-CN = $cn
-[v3_req]
-subjectAltName = @alt_names
-[alt_names]
-DNS.1 = $i
-DNS.2 = localhost
-DNS.3 = *.cluster.local
-DNS.4 = *.svc.cluster.local
-DNS.5 = *.$ns.svc.cluster.local
-DNS.6 = *.kafka.$ns.svc.cluster.local
-DNS.7 = *.$i.$ns.svc.cluster.local
-DNS.8 = $i.mycfk.com
-
-EOF
-)
-fi
         #openssl x509 -noout -text -in $i-ca1-signed.crt
 
         # Sign and import the CA cert into the keystore

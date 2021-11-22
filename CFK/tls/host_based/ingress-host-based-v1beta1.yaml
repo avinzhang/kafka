@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-with-sni
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+spec:
+  tls:
+    - hosts:
+        - controlcenter.mycfk.com
+        - ksqldb.mycfk.com
+        - kafka.mycfk.com
+        - b0.mycfk.com
+        - b1.mycfk.com
+        - b2.mycfk.com
+        - connect.mycfk.com
+  rules:
+    - host: kafka.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-bootstrap
+              servicePort: 9092
+    - host: b0.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-0-internal
+              servicePort: 9092
+    - host: b1.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-1-internal
+              servicePort: 9092
+    - host: b2.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-2-internal
+              servicePort: 9092
+    - host: controlcenter.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: controlcenter-0-internal
+              servicePort: 9021
+    - host: ksqldb.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: ksqldb-bootstrap
+              servicePort: 8088
+    - host: connect.mycfk.com
+      http:
+        paths:
+          - backend:
+              serviceName: connect-bootstrap
+              servicePort: 8083
