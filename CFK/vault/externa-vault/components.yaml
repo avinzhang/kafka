@@ -1,0 +1,56 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: nivavin/cp-server-connect-with-datagen:6.2.1
+    init: confluentinc/cp-init-container-operator:6.1.3.0
+  podTemplate:
+    serviceAccountName: confluent-sa
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-init-first: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/role: "confluent-role"
+      vault.hashicorp.com/client-timeout: "300"
+      vault.hashicorp.com/agent-inject-secret-database-config.txt: "secret/data/database/postgres"
+      vault.hashicorp.com/agent-inject-template-database-config.txt: |
+        {{- with secret "secret/data/database/postgres" -}}
+           password={{ .Data.data.password }}
+        {{- end }}
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:6.2.1
+    init: confluentinc/cp-init-container-operator:6.1.3.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+
+
