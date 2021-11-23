@@ -3,13 +3,13 @@
 kubectl delete -f ./components.yaml
 kubectl delete -f ./zk_broker.yaml
 sleep 10
-helm uninstall vault -n confluent
+helm uninstall vault
 sleep 10
-helm uninstall consul -n confluent
+helm uninstall consul
 sleep 5
-kubectl -n confluent delete pvc data-confluent-consul-consul-server-0
-helm uninstall postgresql -n confluent
+kubectl delete pvc data-confluent-consul-consul-server-0
+helm uninstall postgresql
 sleep 3
-kubectl -n confluent delete pvc data-postgresql-postgresql-0
-helm uninstall confluent-operator -n confluent
-kubectl -n confluent delete sa connect
+kubectl delete pvc data-postgresql-postgresql-0
+helm uninstall confluent-operator 
+kubectl delete sa connect
