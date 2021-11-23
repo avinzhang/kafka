@@ -1,0 +1,4 @@
+[submodule "ansible/cp-ansible"]
+	path = ansible/cp-ansible
+	url = https://github.com/confluentinc/cp-ansible.git
+  ignore = all
