@@ -1,0 +1,75 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+  configOverrides:
+    server:
+      - auto.create.topics.enable=true
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/role: "connect"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: "internal/data/keystore/jksPassword.txt"
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "internal/data/keystore/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: "internal/data/keystore/kafka.keystore.jks"
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "internal/data/keystore/kafka.keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: "internal/data/keystore/kafka.truststore.jks"
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "internal/data/keystore/kafka.truststore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+  listeners:
+    external:
+      tls:
+        enabled: true
+    internal:
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+    bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+    tls:
+      enabled: true
