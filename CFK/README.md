@@ -31,7 +31,7 @@
     ```
     * Delete the cluster
     ```
-    eksctl delete cluster --name avin-eks-cluster
+    eksctl delete cluster --name avin-eks
     ```
     * Scale down cluster to 0
     ```
