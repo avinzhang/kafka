@@ -33,6 +33,10 @@
     ```
     eksctl delete cluster --name avin-eks-cluster
     ```
+    * Scale down cluster to 0
+    ```
+    eksctl scale nodegroup --cluster=avin-eks-cluster --nodes=0 --nodes-min=0 --name=avin-eks-ng
+    ```
 
   * AKS
     * Install azure cli
