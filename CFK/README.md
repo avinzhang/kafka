@@ -16,9 +16,9 @@
     ```
      eksctl create cluster \
      --version 1.18 \
-     --name avin-eks-cluster \
+     --name avin-eks \
      --region ap-southeast-2 \
-     --nodegroup-name avin-eks-nodes \
+     --nodegroup-name eks-ng \
      --node-type t2.medium \
      --nodes 6 \
      --nodes-min 1 \
@@ -35,7 +35,7 @@
     ```
     * Scale down cluster to 0
     ```
-    eksctl scale nodegroup --cluster=avin-eks-cluster --nodes=0 --nodes-min=0 --name=avin-eks-ng
+    eksctl scale nodegroup --cluster=avin-eks --nodes=0 --nodes-min=0 --name=eks-ng
     ```
 
   * AKS
