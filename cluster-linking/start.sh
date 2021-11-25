@@ -45,23 +45,41 @@ echo ">> Show topics from kafka1"
 docker-compose exec kafka1 kafka-topics --list --bootstrap-server kafka1:1093
 echo
 echo
+#docker-compose exec kafka2 bash -c 'echo "{\"groupFilters\": [{\"name\": \"testGroup\",\"patternType\": \"LITERAL\",\"filterType\": \"INCLUDE\"}]}" > groupFilters.json'
+docker-compose exec kafka2 bash -c 'cat << EOF > cluster1-client.properties
+bootstrap.servers=kafka1:1094
+security.protocol=SASL_PLAINTEXT
+consumer.offset.sync.enable=true
+consumer.offset.sync.ms=10000
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="client" password="client";
+sasl.mechanism=PLAIN
+EOF'
+echo
+docker-compose exec kafka2 bash -c 'cat << EOF > cluster2-client.properties
+bootstrap.servers=kafka2:2094
+security.protocol=SSL
+ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
+ssl.truststore.password=confluent
+EOF'
+echo
 echo -e "\n>> Create kafka-cluster-link from kafka1 -> kafka2"
-docker-compose exec kafka2 bash -c 'echo "{\"groupFilters\": [{\"name\": \"*\",\"patternType\": \"LITERAL\",\"filterType\": \"INCLUDE\"}]}" > groupFilters.json'
 docker-compose exec kafka2 kafka-cluster-links \
-	--bootstrap-server kafka2:2093 \
+	--bootstrap-server kafka2:2094 \
+  --command-config cluster2-client.properties \
 	--create \
 	--link kafka-cluster-link \
-	--config bootstrap.servers=kafka1:1093,consumer.offset.sync.enable=true,consumer.offset.sync.ms=10000 \
-	--consumer-group-filters-json-file groupFilters.json
+	--config-file cluster1-client.properties 
+#	--consumer-group-filters-json-file groupFilters.json
 
 sleep 2
 echo ">> List cluster links"
-docker-compose exec kafka2 kafka-cluster-links --list --bootstrap-server kafka2:2093 
+docker-compose exec kafka2 kafka-cluster-links --list --bootstrap-server kafka2:2094 --command-config cluster2-client.properties
 echo
 echo
 echo -e "\n>> Create an mirror of test topic on kafka2"
 docker-compose exec kafka2 kafka-mirrors --create \
-	--bootstrap-server kafka2:2093 \
+	--bootstrap-server kafka2:2094 \
+  --command-config cluster2-client.properties \
 	--mirror-topic test \
 	--link kafka-cluster-link \
 	--replication-factor 1
@@ -70,30 +88,30 @@ echo ">>done"
 
 echo 
 echo ">> List mirrored topics from kafka2"
-docker-compose exec kafka2 kafka-cluster-links --list --bootstrap-server kafka2:2093 --include-topics
+docker-compose exec kafka2 kafka-cluster-links --list --bootstrap-server kafka2:2094 --command-config cluster2-client.properties --include-topics
 
 echo
 echo "----Produce messages to test topic in kafka1 of Cluster1-----"
-docker-compose exec kafka1 bash -c "seq 10 | kafka-console-producer --request-required-acks 1 --broker-list kafka1:1093 --topic test && echo 'Produced 10 messages.'"
+docker-compose exec kafka2 bash -c "seq 10 | kafka-console-producer --producer.config cluster1-client.properties --request-required-acks 1 --broker-list kafka1:1094 --topic test && echo 'Produced 10 messages.'"
 echo
 echo "---Consume messages from test topic in kafka2 from Cluster2----"
-docker-compose exec kafka2 bash -c "kafka-console-consumer --bootstrap-server kafka2:2093 --topic test --from-beginning --timeout-ms 5000"
+docker-compose exec kafka2 bash -c "kafka-console-consumer --bootstrap-server kafka2:2094 --consumer.config cluster2-client.properties --topic test --from-beginning --timeout-ms 10000"
 echo
 echo
 echo ">> Check replica status on the destination"
-docker-compose exec kafka2 kafka-replica-status --topics test --include-linked --bootstrap-server localhost:2093
+docker-compose exec kafka2 kafka-replica-status --topics test --include-linked --bootstrap-server localhost:2094 --admin.config cluster2-client.properties
 echo
 echo ">> Verify if destination is read-only"
-docker-compose exec kafka2 bash -c "seq 2 | kafka-console-producer --request-required-acks 1 --broker-list kafka2:2093 --topic test"
+docker-compose exec kafka2 bash -c "seq 2 | kafka-console-producer --request-required-acks 1 --broker-list kafka2:2094 --producer.config cluster2-client.properties --topic test"
 
 echo
 echo 
 echo ">> Cut over the mirrored topic to make it writable"
-docker-compose exec kafka2 kafka-mirrors --promote --topics test --bootstrap-server kafka2:2093
+docker-compose exec kafka2 kafka-mirrors --promote --topics test --bootstrap-server kafka2:2094 --command-config cluster2-client.properties
 echo
 echo ">> Check if mirrored topic has stopped mirroring"
-docker-compose exec kafka2 kafka-mirrors --describe --topics test --pending-stopped-only --bootstrap-server kafka2:2093
+docker-compose exec kafka2 kafka-mirrors --describe --topics test --pending-stopped-only --bootstrap-server kafka2:2094 --command-config cluster2-client.properties
 echo 
 echo
 echo ">> the test topic on kafka2 should be writable"
-docker-compose exec kafka2 bash -c "seq 2 | kafka-console-producer --request-required-acks 1 --broker-list kafka2:2093 --topic test"
+docker-compose exec kafka2 bash -c "seq 2 | kafka-console-producer --request-required-acks 1 --broker-list kafka2:2094 --producer.config cluster2-client.properties --topic test && echo 'Produced 2 messages.'"
