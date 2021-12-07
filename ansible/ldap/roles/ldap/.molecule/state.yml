@@ -1,0 +1,34 @@
+---
+converged: null
+created: true
+default_platform: null
+default_provider: null
+driver: vagrant
+driver_config:
+  current_platform: ubuntu
+  current_provider: virtualbox
+  instances:
+  - ansible_groups:
+    - group1
+    name: test-role-vagrant
+    vm_name: test-role-vagrant
+  platforms:
+  - box: centos/7
+    name: centos
+  - box: fedora/25-cloud-base
+    name: fedora
+  - box: ubuntu/trusty64
+    name: ubuntu
+  providers:
+  - name: virtualbox
+    options:
+      cpus: 2
+      memory: 512
+    type: virtualbox
+  raw_config_args:
+  - ssh.insert_key = false
+hosts:
+  test-role-vagrant:
+    groups:
+    - group1
+multiple_platforms: null

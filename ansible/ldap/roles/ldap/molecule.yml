@@ -1,0 +1,43 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+vagrant:
+  platforms:
+    - name: centos
+      box: centos/7
+    - name: fedora
+      box: fedora/25-cloud-base
+    - name: ubuntu
+      box: ubuntu/trusty64
+  providers:
+    - name: virtualbox
+      type: virtualbox
+      options:
+        memory: 512
+        cpus: 2
+  instances:
+    - name: test-role-vagrant
+      ansible_groups:
+        - group1
+  raw_config_args:
+     - "ssh.insert_key = false"
+docker:
+  containers:
+    - name: ansible-role-test-openldap-server
+      image: centos_docker
+      image_version: latest
+      cap_add: 
+        - 'SYS_ADMIN'
+      volume_mounts:
+        - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+      privileged: True
+      command: /sbin/init
+      ansible_groups:
+        - group1
+ansible:
+  verbose: vvvv
+  become: yes
+verifier:
+  name: testinfra

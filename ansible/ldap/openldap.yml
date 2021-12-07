@@ -1,0 +1,7 @@
+---
+- hosts: openldap.example.com
+  remote_user: centos
+  become: true
+  tasks:
+  - include_role:
+      name: ldap
