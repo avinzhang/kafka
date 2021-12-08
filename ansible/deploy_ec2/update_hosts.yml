@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: EC2 Facts for dbserver
+    ec2_instance_info:
+      region: "{{ aws_region }}"
+      filters:
+        "tag:Environment": "{{ aws_environment }}"
+        instance-state-name: running
+    register: ec2
+    
+  - name: Add all instance public IPs to host group
+    add_host: hostname={{ item.public_dns_name }} groups=ec2hosts
+    loop: "{{ ec2.instances }}"
+
+
+- hosts: ec2hosts
+  name: configuration play
+  become_user: root
+  remote_user: centos
+  become: true
+  gather_facts: true
+  tasks:
+  - name: Add IP address of all hosts to all hosts
+    copy:
+      dest: /etc/hosts
+      src: /tmp/myhosts_internal
+

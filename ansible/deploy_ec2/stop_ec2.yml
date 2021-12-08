@@ -1,0 +1,28 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: EC2 Facts
+    ec2_instance_info:
+      region: "{{ aws_region }}"
+      aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+      aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+      filters: 
+        "tag:Environment": "{{ aws_environment }}"
+    register: ec2
+
+  - name: Termination check
+    pause: prompt='You are about to stop ec2 instances. Please confirm you want to continue! Press return to continue. Press Ctrl+c and then "a" to abort'
+    no_log: true
+
+  - name: Kill EC2 Instance
+    ec2:
+      instance_ids: "{{ item.instance_id }}"
+      state: stopped
+      region: "{{ aws_region }}"
+      aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+      aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+      wait: yes
+    with_items: "{{ ec2.instances }}"
+
+

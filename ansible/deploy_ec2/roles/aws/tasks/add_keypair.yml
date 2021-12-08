@@ -1,0 +1,9 @@
+---
+
+- name:  create key pair using key_material obtained using 'file' lookup plugin
+  ec2_key:
+    name: "{{ aws_keypair_name }}"
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+    region: "{{ aws_region }}"
+    key_material: "{{ lookup('file', '{{ sshkey_path }}') }}"

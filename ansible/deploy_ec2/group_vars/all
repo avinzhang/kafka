@@ -1,0 +1,100 @@
+---
+#ap-southeast-2
+aws_region: ap-southeast-2
+#centos 7 image
+aws_ami: ami-08bd00d7713a39e7d
+#ubuntu 16 image
+#aws_ami: ami-0257304d38f0c6e7d
+#ubuntu 18 image
+#aws_ami: ami-03646f515d078ec29
+#ubuntu 20 image
+#aws_ami: ami-06a532d102dd419f8
+
+#ap-southeast-1
+#aws_region: ap-southeast-1
+#aws_ami: ami-72b5830e
+
+#us-east-1
+#aws_ami: ami-0b2045146eb00b617
+#aws_region: us-east-1
+#
+#ap-northeast-1
+#aws_ami: ami-54a1562b
+#aws_region: ap-northeast-1
+
+
+
+aws_environment: "avin"
+aws_vpc_name: "avin-vpc"
+aws_vpc_cidr: "10.10.0.0/16"
+aws_subnet_cidr: "10.10.0.0/26"
+aws_subnet_name: avin-subnet
+aws_igw_name: avin-gw
+aws_route_name: avin-route
+
+
+aws_keypair_name: avin-sshkey
+sshkey_path: /Users/avin/.ssh/id_rsa.pub
+
+aws_security_groups:
+- name: avin-sg
+  description: Security group for avins instances
+  region: "{{ aws_region }}"
+  rules:
+  - proto: tcp
+    from_port: 22
+    to_port: 22
+    cidr_ip: 0.0.0.0/0
+  - proto: icmp
+    from_port: -1
+    to_port: -1
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    ports: 
+    - 2888
+    - 3888
+    - 2181
+    - 2182
+    - 8090
+    - 9092
+    - 9091
+    - 9093
+    - 8083
+    - 8081
+    - 9021
+    - 389
+    - 636
+    cidr_ip: 10.10.0.0/16
+  - proto: tcp
+    ports:
+    - 9021
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    ports:
+    - 8200
+    cidr_ip: 0.0.0.0/0
+  rules_egress:
+  - proto: all
+    cidr_ip: 0.0.0.0/0
+
+
+aws_ec2_instances:
+- tag_name: master-avin
+  tag_environment: "{{ aws_environment }}"
+  instance_type: t2.medium
+  security_group: avin-sg
+  region: "{{ aws_region }}"
+  volume_size: 10
+  exact_count: 0
+  delete_vol_on_termination: yes
+  sshkey_name: "{{ aws_keypair_name }}"
+- tag_name: nodes-avin
+  tag_environment: "{{ aws_environment }}"
+  instance_type: t2.medium
+  security_group: avin-sg
+  region: "{{ aws_region }}"
+  volume_size: 10
+  exact_count: 7
+  delete_vol_on_termination: yes
+  sshkey_name: "{{ aws_keypair_name }}"
+

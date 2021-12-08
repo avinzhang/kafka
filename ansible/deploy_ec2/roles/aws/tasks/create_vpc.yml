@@ -1,0 +1,57 @@
+---
+# tasks file for aws
+- name: Create VPC
+  ec2_vpc_net:
+    name: "{{ aws_vpc_name }}"
+    cidr_block: "{{ aws_vpc_cidr }}"
+    region: "{{ aws_region }}"
+    state: present
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+  register: vpc
+
+- name: Create gateway
+  ec2_vpc_igw:
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    state: present
+    tags: 
+      name: "{{ aws_igw_name }}"
+  register: igw
+
+- name: associate subnet to the VPC
+  ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    cidr: "{{ aws_subnet_cidr }}"
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+    map_public: yes
+    resource_tags:
+      Name: "{{ aws_subnet_name }}"
+  register: subnet
+
+- name: Get route table info
+  ec2_vpc_route_table_info:
+    region: "{{ aws_region }}"
+    filters:
+      vpc-id: "{{ vpc.vpc.id }}"
+  register: routetable
+
+- name: Route IGW
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+    purge_subnets: false
+    route_table_id: "{{ routetable.route_tables[0].id }}"
+    lookup: id
+    subnets:
+      - "{{ subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id  }}"
+    tags:
+      Name: "{{ aws_route_name }}"

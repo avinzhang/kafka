@@ -1,0 +1,6 @@
+---
+# tasks file for aws
+#
+- include_tasks: create_vpc.yml
+- include_tasks: add_keypair.yml
+- include_tasks: create_ec2.yml

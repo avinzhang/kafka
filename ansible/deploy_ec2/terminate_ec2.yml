@@ -1,0 +1,84 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: EC2 Facts
+    ec2_instance_info:
+      region: "{{ aws_region }}"
+      filters: 
+        "tag:Environment": "{{ aws_environment }}"
+    register: ec2
+
+  - name: Termination check
+    pause: prompt='You are about to terminate Mygserver instances. Please confirm you want to continue! Press return to continue. Press Ctrl+c and then "a" to abort'
+    no_log: true
+
+  - name: Kill EC2 Instance
+    ec2:
+      instance_ids: "{{ item.instance_id }}"
+      state: absent
+      region: "{{ aws_region }}"
+      wait: yes
+    with_items: "{{ ec2.instances }}"
+
+  - name: remove security group
+    ec2_group:
+      name: "{{ item.name }}"
+      region: "{{ item.region }}"
+      state: absent
+    with_items: "{{ aws_security_groups }}"
+
+  - name:  create key pair using key_material obtained using 'file' lookup plugin
+    ec2_key:
+      name: "{{ aws_keypair_name }}"
+      region: "{{ aws_region }}"
+      state: absent
+
+  - name: Get VPC info
+    ec2_vpc_net_info:
+      region: "{{ aws_region }}"
+      filters:
+        "tag:Name": "{{ aws_vpc_name }}"
+    register: vpc
+
+  - name: vpc info
+    debug:
+      msg: "{{ vpc.vpcs }}"
+
+  - name: Remove gateway
+    ec2_vpc_igw:
+      region: "{{ aws_region }}"
+      vpc_id: "{{ vpc.vpcs[0].id }}"
+      state: absent
+      tags:
+        name: "{{ aws_igw_name }}"
+    when: "{{ vpc.vpcs|length }} > 0"
+
+  - name: Remove subnet
+    ec2_vpc_subnet:
+      state: absent
+      vpc_id: "{{ vpc.vpcs[0].id }}"
+      region: "{{ aws_region }}"
+      cidr: "{{ aws_subnet_cidr }}"
+      resource_tags:
+        Name: "{{ aws_subnet_name }}"
+    when: "{{ vpc.vpcs|length }} > 0"
+
+  - name: Remove VPC
+    ec2_vpc_net:
+      name: "{{ aws_vpc_name }}"
+      region: "{{ aws_region }}"
+      cidr_block: "{{ aws_vpc_cidr }}"
+      purge_cidrs: yes
+      state: absent
+
+  - name: Remove route table
+    ec2_vpc_route_table:
+      vpc_id: "{{ vpc.vpcs[0].id }}"
+      region: "{{ aws_region }}"
+      purge_subnets: yes
+      state: absent
+      tags:
+        Name: "{{ aws_route_name }}"
+    when: "{{ vpc.vpcs|length }} > 0"
+
