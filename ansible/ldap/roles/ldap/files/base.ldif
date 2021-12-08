@@ -52,6 +52,7 @@ cn: userUser
 givenName: super
 sn: SuperUser
 ou: Users
+userPassword: superUser
 uid: superUser
 uidNumber: 10000
 gidNumber: 5000
@@ -65,6 +66,7 @@ objectclass: posixAccount
 objectClass: shadowAccount
 cn: mds
 givenName: mds
+userPassword: mds
 sn: MDS
 ou: Users
 uid: mds
