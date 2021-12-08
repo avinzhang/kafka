@@ -15,13 +15,13 @@
     * Create cluster with eksctl, the provisioning process will take a while
     ```
      eksctl create cluster \
-     --version 1.18 \
+     --version 1.19 \
      --name avin-eks \
      --region ap-southeast-2 \
      --nodegroup-name eks-ng \
-     --node-type t2.medium \
-     --nodes 6 \
-     --nodes-min 1 \
+     --node-type t3.small \
+     --nodes 0 \
+     --nodes-min 0 \
      --nodes-max 12 \
      --ssh-access \
      --ssh-public-key ~/.ssh/id_rsa.pub \
@@ -33,7 +33,7 @@
     ```
     eksctl delete cluster --name avin-eks
     ```
-    * Scale down cluster to 0
+    * Scale down nodegroup to 0
     ```
     eksctl scale nodegroup --cluster=avin-eks --nodes=0 --nodes-min=0 --name=eks-ng
     ```
