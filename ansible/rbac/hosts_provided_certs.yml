@@ -1,0 +1,100 @@
+---
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_user: centos
+    ansible_become: true
+    ansible_ssh_private_key_file: ~/.ssh/id_rsa
+
+    ssl_enabled: true
+    ssl_provided_keystore_and_truststore: true
+    ssl_keystore_filepath: "../certs/{{inventory_hostname}}.keystore.jks"
+    ssl_keystore_key_password: confluent
+    ssl_keystore_store_password: confluent
+    ssl_truststore_filepath: "../certs/{{inventory_hostname}}.truststore.jks"
+    ssl_truststore_password: confluent
+    sasl_protocol: plain
+
+    kafka_broker_service_environment_overrides:
+      KAFKA_HEAP_OPTS: "-Xms2g -Xmx2g"
+
+    secrets_protection_enabled: false
+    rbac_enabled: true
+    mds_super_user: mds
+    mds_super_user_password: mds
+    kafka_broker_ldap_user: superUser
+    kafka_broker_ldap_password: superUser
+    schema_registry_ldap_user: schemaregistry
+    schema_registry_ldap_password: schemaregistry
+    kafka_connect_ldap_user: connect
+    kafka_connect_ldap_password: connect
+    ksql_ldap_user: ksql
+    ksql_ldap_password: ksql
+    kafka_rest_ldap_user: restproxy
+    kafka_rest_ldap_password: restproxy
+    control_center_ldap_user: controlcenter
+    control_center_ldap_password: controlcenter
+    token_services_public_pem_file: ../mds_keys/public.pem
+    token_services_private_pem_file: ../mds_keys/keypair.pem
+    kafka_broker_principal:
+      - superUser
+    kafka_broker_custom_listeners:
+      client:
+        name: CLIENT
+        port: 9095
+
+zookeeper:
+  vars:
+    zookeeper_custom_properties:
+      4lw.commands.whitelist: “*”
+  hosts:
+    zookeeper1.example.com:
+    zookeeper2.example.com:
+    zookeeper3.example.com:
+
+
+kafka_broker:
+  vars:
+    kafka_broker_custom_properties:
+      ldap.java.naming.factory.initial: com.sun.jndi.ldap.LdapCtxFactory
+      ldap.com.sun.jndi.ldap.read.timeout: 3000
+      ldap.java.naming.provider.url: ldap://openldap.example.com:389
+      ldap.java.naming.security.principal: cn=admin,DC=example,DC=com
+      ldap.java.naming.security.credentials: admin
+      ldap.java.naming.security.authentication: simple
+      ldap.user.search.base: OU=users,DC=example,DC=com
+      ldap.group.search.base: OU=groups,DC=example,DC=com
+      ldap.user.name.attribute: uid
+      ldap.user.memberof.attribute.pattern: CN=(.*),OU=users,DC=example,DC=com
+      ldap.group.name.attribute: cn
+      ldap.group.member.attribute.pattern: CN=(.*),OU=groups,DC=example,DC=com
+      ldap.user.object.class: inetOrgPerson
+  hosts:
+    kafka1.example.com:
+    kafka2.example.com:
+    kafka3.example.com:
+
+schema_registry:
+  hosts:
+    schemaregistry.example.com:
+
+kafka_rest:
+  hosts:
+    kafkarest.example.com:
+
+ksql:
+  hosts:
+    ksqldb.example.com:
+
+
+kafka_connect:
+  hosts:
+    connect1.example.com:
+    connect2.example.com:
+
+
+
+control_center:
+  hosts:
+    controlcenter.example.com:
+
