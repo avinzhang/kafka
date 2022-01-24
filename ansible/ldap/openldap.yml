@@ -5,3 +5,9 @@
   tasks:
   - include_role:
       name: ldap
+    vars:
+      ssl: true
+      ssl_ca_cert: '../certs/ca.crt'
+      ssl_cert: '../certs/openldap.example.com-ca-signed.crt'
+      ssl_private_key: '../certs/openldap.example.com.key'
+
