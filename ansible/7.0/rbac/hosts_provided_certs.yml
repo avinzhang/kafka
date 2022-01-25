@@ -8,10 +8,10 @@ all:
 
     ssl_enabled: true
     ssl_provided_keystore_and_truststore: true
-    ssl_keystore_filepath: "~/confluentinc/kafka-one/ansible/certs/{{inventory_hostname}}.keystore.jks"
+    ssl_keystore_filepath: './../../certs/{{inventory_hostname}}.keystore.jks'
     ssl_keystore_key_password: confluent
     ssl_keystore_store_password: confluent
-    ssl_truststore_filepath: "~/confluentinc/kafka-one/ansible/certs/{{inventory_hostname}}.truststore.jks"
+    ssl_truststore_filepath: './../../certs/{{inventory_hostname}}.truststore.jks'
     ssl_truststore_password: confluent
     sasl_protocol: plain
 
@@ -34,8 +34,8 @@ all:
     kafka_rest_ldap_password: restproxy
     control_center_ldap_user: controlcenter
     control_center_ldap_password: controlcenter
-    token_services_public_pem_file: ~/confluentinc/kafka-one/ansible/7.0/rbac/mds_keys/public.pem
-    token_services_private_pem_file: ~/confluentinc/kafka-one/ansible/7.0/rbac/mds_keys/keypair.pem
+    token_services_public_pem_file: '{{inventory_dir}}/mds_keys/public.pem'
+    token_services_private_pem_file: '{{inventory_dir}}/mds_keys/keypair.pem'
     kafka_broker_principal:
       - superUser
     kafka_broker_custom_listeners:
