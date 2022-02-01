@@ -13,7 +13,7 @@ ls ./jar/confluentinc-kafka-connect-replicator/lib/connect-replicator-$replicato
 echo
 echo
 echo "----Start everything up with version $TAG------------"
-docker-compose up -d --build --no-deps zookeeper1 kafka1 connect1 schemaregistry zookeeper2 kafka2 connect2 controlcenter #&>/dev/null
+docker-compose up -d --build --no-deps zookeeper1 kafka1 connect1 schemaregistry zookeeper2 kafka2 connect2 zookeeper3 kafka3 controlcenter #&>/dev/null
 echo
 echo
 connect_ready=false
@@ -71,7 +71,7 @@ docker-compose exec connect2 curl -i -X POST -H "Accept:application/json" \
     }' &> /dev/null
 sleep 3
 echo
-cho "* Check replicator status"
+echo "* Check replicator status"
 echo "  Replicator:  `curl -s http://localhost:18083/connectors/replicator/status | jq .connector.state`"
 
 
