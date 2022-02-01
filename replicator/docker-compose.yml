@@ -1,0 +1,222 @@
+---
+version: '3.4'
+services:
+  zookeeper1:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper1
+    container_name: zookeeper1
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+    networks:
+      example.com: {}
+
+  kafka1:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka1
+    container_name: kafka1
+    ports:
+      - "9092:9092"
+      - "8090:8090"
+      - "9991:9991"
+    depends_on:
+      - zookeeper1
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:9092,PLAINTEXT://kafka1:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka1:9093"
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "true"
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+      KAFKA_JMX_PORT: 9991
+      KAFKA_JMX_HOSTNAME: localhost
+    networks:
+      example.com: {}
+
+  schemaregistry:
+    image: confluentinc/cp-schema-registry:$TAG
+    hostname: schemaregistry
+    container_name: schemaregistry
+    restart: on-failure:3
+    depends_on:
+      - zookeeper1
+      - kafka1
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper1:2181'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka1:9093'
+      SCHEMA_REGISTRY_LISTENERS: "http://schemaregistry:8081"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+    networks:
+      example.com: {}
+
+  connect1:
+    image: confluentinc/cp-kafka-connect:$TAG
+    hostname: connect1
+    container_name: connect1
+    restart: always
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./jar:/usr/share/java/jar
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka1:9093"
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_REST_PORT: 8083
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect1
+      CONNECT_LISTENERS: "http://0.0.0.0:8083"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: "/usr/share/java"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+    networks:
+      example.com: {}
+
+  zookeeper2:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper2
+    container_name: zookeeper2
+    ports:
+      - "12181:12181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 12181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+    networks:
+      example.com: {}
+
+  kafka2:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka2
+    container_name: kafka2
+    ports:
+      - "19092:19092"
+      - "18090:18090"
+      - "19991:19991"
+    depends_on:
+      - zookeeper2
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper2:12181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:19092,PLAINTEXT://kafka2:19093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka2:19093"
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "true"
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+      KAFKA_JMX_PORT: 19991
+      KAFKA_JMX_HOSTNAME: localhost
+    networks:
+      example.com: {}
+
+  connect2:
+    image: confluentinc/cp-kafka-connect:$TAG
+    hostname: connect2
+    container_name: connect2
+    restart: always
+    ports:
+      - "18083:18083"
+    volumes:
+      - ./jar:/usr/share/java/jar
+    environment:
+      CLASSPATH: '/usr/share/java/jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-$TAG.jar'
+      CONNECT_REST_EXTENSION_CLASSES: io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
+      CONNECT_BOOTSTRAP_SERVERS: "kafka2:19093"
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_REST_PORT: 18083
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect2
+      CONNECT_LISTENERS: "http://0.0.0.0:18083"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: "/usr/share/java"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+    networks:
+      example.com: {}
+
+  controlcenter:
+    image: confluentinc/cp-enterprise-control-center:$TAG
+    hostname: controlcenter
+    container_name: controlcenter
+    restart: always
+    depends_on:
+      - zookeeper2
+      - kafka2
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: "zookeeper2:12181"
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka2:19093"
+      CONTROL_CENTER_KAFKA_ORIGIN_BOOTSTRAP_SERVERS: kafka1:9093
+      CONTROL_CENTER_KAFKA_DEST_BOOTSTRAP_SERVERS: kafka2:19093
+      CONTROL_CENTER_INTERNAL_TOPICS_REPLICATION: 1
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_REST_LISTENERS: "http://0.0.0.0:9021"
+      CONTROL_CENTER_CONNECT_ORIGIN_CLUSTER: "http://connect1:8083"
+      CONTROL_CENTER_CONNECT_DEST_CLUSTER: "http://connect2:18083"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schemaregistry:8081"
+    networks:
+      example.com: {}
+
+networks:
+  example.com:
+    name: "example.com"
+    driver: bridge
