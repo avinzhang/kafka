@@ -53,15 +53,10 @@ echo
 echo 
 echo ">>Waiting for schema registry pods to be created"
 schemaregistry_pod_created=false
-while [ $schemaregistry_pod_created == false ]
+while [ "$schemaregistry_pod_created" = false ]
 do
-    kubectl get po schemaregistry-0
-    if [ $? -eq 0 ]; then
-      schemaregistry_pod_created=true
-      echo ">>>>All schema registry pods are created"
-    else
-      echo ">>>>Waiting for schema registry pods to be created"
-    fi
+    kubectl get po schemaregistry-0 &>/dev/null && schemaregistry_pod_created=true && echo ">>>>All schema registry pods are created"
+    kubectl get po schemaregistry-0 &>/dev/null || echo ">>>>Waiting for schema registry pods to be created"
     sleep 5
 done
 echo ">>Waiting for schemaregistry pods to come up"
