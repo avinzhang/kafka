@@ -1,0 +1,146 @@
+dn: cn=administrators,ou=groups,dc=example,dc=com
+changetype: add
+cn: administrators
+objectClass: top
+objectClass: groupOfNames
+member: cn=admin,ou=users,dc=example,dc=com
+member: cn=mds,ou=users,dc=example,dc=com
+
+dn: cn=kafka users,ou=groups,dc=example,dc=com
+changetype: add
+cn: kafka
+objectClass: top
+objectClass: groupOfNames
+member: cn=c3user,ou=users,dc=example,dc=com
+
+dn: cn=mds,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: mds superuser
+sn: mds superuser
+uid: mds
+userPassword: mds
+
+dn: cn=interbroker,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: inter broker
+sn: inter broker
+uid: interbroker
+userPassword: interbroker
+
+dn: cn=kafka,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: kafka broker
+sn: kafka broker
+uid: kafka
+userPassword: kafka
+
+dn: cn=restproxy,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: rest proxy
+sn: rest proxy
+uid: restproxy
+userPassword: restproxy
+
+dn: cn=connectAdmin,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: connect admin
+sn: connect admin
+uid: connectAdmin
+userPassword: connectAdmin
+
+dn: cn=connectUser,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: connect user
+sn: connect user
+uid: connectUser
+userPassword: connectUser
+
+dn: cn=schemaregistry,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: schema registery
+sn: schema registery
+uid: schemaregistry
+userPassword: schemaregistry
+
+dn: cn=ksqldb,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: ksqldb user
+sn: ksqldb user
+uid: ksqldb
+userPassword: ksqldb
+
+dn: cn=controlcenter,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: controlcenter
+sn: controlcenter
+uid: controlcenter
+userPassword: controlcenter
+
+dn: cn=c3user,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: c3 user
+sn: c3 user
+uid: c3user
+userPassword: c3user
+
+dn: cn=user1,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: cluster1 user
+sn: c3 user
+uid: user1
+userPassword: user1
+
+dn: cn=user2,ou=users,dc=example,dc=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: cluster2 user
+sn: cluster2 user
+uid: user2
+userPassword: user2
