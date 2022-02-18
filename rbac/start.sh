@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=6.2.1
+export TAG=7.0.1
 
 echo "----------Start Openldap---------"
 docker-compose up -d --build --no-deps openldap
