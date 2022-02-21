@@ -95,7 +95,6 @@ services:
       KAFKA_SUPER_USERS: User:admin;User:mds;User:metricsreporter;User:interbroker;User:restAdmin
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
       #KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=DEBUG,org.eclipse.jetty.server=DEBUG,io.confluent.rest-utils=DEBUG,io.confluent.rbacapi=DEBUG,io.confluent.tokenapi=DEBUG,io.confluent.security.auth=DEBUG,io.confluent.security.store=DEBUG,io.confluent.common.security.jetty=DEBUG,io.confluent.kafka.security.ldap.authorizer.LdapGroupManager=TRACE,io.confluent.security.auth.provider.ldap=TRACE"
-      KAFKA_LOG4J_LOGGERS: "org.eclipse.jetty.server=DEBUG,io.confluent.rest-utils=DEBUG,io.confluent.rbacapi=DEBUG,io.confluent.tokenapi=DEBUG,io.confluent.security.auth=DEBUG,io.confluent.security.store=DEBUG,io.confluent.common.security.jetty=DEBUG,io.confluent.kafka.security.ldap.authorizer.LdapGroupManager=TRACE,io.confluent.security.auth.provider.ldap=TRACE"
 
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
 
@@ -553,7 +552,7 @@ services:
       CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: c3Admin:c3Admin
 
       
-      CONTROL_CENTER_LOG4J_ROOT_LOGLEVEL: DEBUG
+      CONTROL_CENTER_LOG4J_ROOT_LOGLEVEL: INFO
     networks:
       example.com: {}
 
