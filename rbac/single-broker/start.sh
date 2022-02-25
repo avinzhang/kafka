@@ -73,9 +73,9 @@ echo
 echo ">>>Setup config for mTls port"
 docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/client-ssl.properties
 security.protocol=SSL
-ssl.keystore.location=/etc/kafka/secrets/client.keystore.jks
+ssl.keystore.location=/etc/kafka/secrets/user1.keystore.jks
 ssl.keystore.password=confluent
-ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
+ssl.truststore.location=/etc/kafka/secrets/user1.truststore.jks
 ssl.truststore.password=confluent
 ssl.key.password=confluent
 EOF'
@@ -333,7 +333,7 @@ docker-compose exec ksqldb-server bash -c "cat << EOF > /tmp/client.properties
 ssl.truststore.location=/etc/kafka/secrets/ksqldb-server.truststore.jks
 ssl.truststore.password=confluent
 EOF"
-
+exit
 echo "Start ksql streams and queries"
 docker-compose exec ksqldb-server bash -c "ksql --config-file /tmp/client.properties -u ksqldbUser -p ksqldbUser https://localhost:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
@@ -365,3 +365,13 @@ echo "   * Permission for schema registry"
 confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3User --role ClusterAdmin --schema-registry-cluster-id schema-registry
 echo "   * Permission for ksqldb"
 confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3User --role ClusterAdmin --ksql-cluster-id $KSQLDB_CLUSTER_ID
+
+echo ">> Test group permission: add role for c3users group"
+echo ">> user2 belongs to c3users group"
+confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal Group:c3users --role ClusterAdmin
+echo "   * Permission for Connect cluster"
+confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3users --role ClusterAdmin --connect-cluster-id connect-cluster
+echo "   * Permission for schema registry"
+confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3users --role ClusterAdmin --schema-registry-cluster-id schema-registry
+echo "   * Permission for ksqldb"
+confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3users --role ClusterAdmin --ksql-cluster-id $KSQLDB_CLUSTER_ID

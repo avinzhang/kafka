@@ -5,9 +5,9 @@ expect <<END
   log_user 1
   spawn confluent login --url https://localhost:1090 --ca-cert-path ./secrets/ca.crt
   expect "Username: "
-  send "superUser\r";
+  send "mds\r";
   expect "Password: "
-  send "superUser\r";
+  send "mds\r";
   expect "Logged in as "
   set result $expect_out(buffer)
 END

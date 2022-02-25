@@ -1,6 +1,0 @@
-dn: cn=Developers,ou=groups,{{ LDAP_BASE_DN }}
-objectClass: top
-objectClass: posixGroup
-cn: Developers
-gidNumber: 5000
-
