@@ -1,0 +1,355 @@
+---
+version: '3.4'
+services:
+  zookeeper1:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper1
+    container_name: zookeeper1
+    ports:
+      - "1181:1181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 1181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+           -Dzookeeper.4lw.commands.whitelist=*
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+  zookeeper2:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper2
+    container_name: zookeeper2
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+           -Dzookeeper.4lw.commands.whitelist=*
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+
+  zookeeper3:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper3
+    container_name: zookeeper3
+    ports:
+      - "3181:3181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 3181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+           -Dzookeeper.4lw.commands.whitelist=*
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+  kafka1:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka1
+    container_name: kafka1
+    restart: on-failure:3
+    ports:
+      - 1090:1090
+      - 1092:1092
+      - 1093:1093
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2181,zookeeper3:3181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERBROKER:PLAINTEXT,SECURE:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERBROKER://kafka1:1092,SECURE://kafka1:1093
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: SECURE
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      #KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=DEBUG"
+
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_SUPER_USERS: User:kafka
+
+      KAFKA_LISTENER_NAME_SECURE_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_SECURE_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="kafka" \
+        password="kafka" \
+        user_kafka="kafka" \
+        user_connect="connect" \
+        user_schemaregistry="schemaregistry" \
+        user_restproxy="restproxy" \
+        user_c3="c3" \
+        user_ksql="ksql" \
+        user_metric="metric" \
+        user_client="client";
+
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: SECURE://kafka1:1093,SECURE://kafka2:2093,SECURE://kafka3:3093
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: PLAIN
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+          username="kafka" \
+          password="kafka";
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: 'true'
+
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry:8081
+
+      KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
+
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://kafka1:1090
+      #KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: http://0.0.0.0:1090
+      #KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: http://kafka1:1090
+      #KAFKA_CONFLUENT_METADATA_SERVER_BOOTSTRAP_SERVER: SASL_PLAINTEXT://kafka1:1093,SASL_PLAINTEXT://kafka2:2093,SASL_PLAINTEXT://kafka3:3093
+      #KAFKA_CONFLUENT_METADATA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      #KAFKA_CONFLUENT_METADATA_SERVER_SASL_MECHANISM: PLAIN
+      #KAFKA_CONFLUENT_METADATA_SERVER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka;
+      
+      #Embedded Rest Proxy config required for http server
+      KAFKA_KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_KAFKA_REST_CLIENT_SASL_MECHANISM: PLAIN
+      KAFKA_KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka" password="kafka";
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+  
+  kafka2:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka2
+    container_name: kafka2
+    restart: on-failure:3
+    ports:
+      - 2090:2090
+      - 2092:2092
+      - 2093:2093
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2181,zookeeper3:3181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERBROKER:PLAINTEXT,SECURE:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERBROKER://kafka2:2092,SECURE://kafka2:2093
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: SECURE
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_SUPER_USERS: User:kafka
+
+      KAFKA_LISTENER_NAME_SECURE_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_SECURE_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="kafka" \
+        password="kafka" \
+        user_kafka="kafka" \
+        user_connect="connect" \
+        user_schemaregistry="schemaregistry" \
+        user_restproxy="restproxy" \
+        user_c3="c3" \
+        user_ksql="ksql" \
+        user_metric="metric" \
+        user_client="client";
+
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: SECURE://kafka1:1093,SECURE://kafka2:2093,SECURE://kafka3:3093
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: PLAIN
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+          username="kafka" \
+          password="kafka";
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: 'true'
+
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry:8081
+
+      KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
+
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://kafka2:2090
+      #KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: http://0.0.0.0:2090
+      #KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: http://kafka2:2090
+      #KAFKA_CONFLUENT_METADATA_SERVER_BOOTSTRAP_SERVER: SASL_PLAINTEXT://kafka1:1093,SASL_PLAINTEXT://kafka2:2093,SASL_PLAINTEXT://kafka3:3093
+      #KAFKA_CONFLUENT_METADATA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      #KAFKA_CONFLUENT_METADATA_SERVER_SASL_MECHANISM: PLAIN
+      #KAFKA_CONFLUENT_METADATA_SERVER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka;
+
+      KAFKA_KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_KAFKA_REST_CLIENT_SASL_MECHANISM: PLAIN
+      KAFKA_KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka" password="kafka";
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+  kafka3:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka3
+    container_name: kafka3
+    restart: on-failure:3
+    ports:
+      - 3090:3090
+      - 3092:3092
+      - 3093:3093
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2181,zookeeper3:3181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERBROKER:PLAINTEXT,SECURE:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERBROKER://kafka3:3092,SECURE://kafka3:3093
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: SECURE
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_SUPER_USERS: User:kafka
+
+      KAFKA_LISTENER_NAME_SECURE_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_SECURE_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="kafka" \
+        password="kafka" \
+        user_kafka="kafka" \
+        user_connect="connect" \
+        user_schemaregistry="schemaregistry" \
+        user_restproxy="restproxy" \
+        user_c3="c3" \
+        user_ksql="ksql" \
+        user_metric="metric" \
+        user_client="client";
+
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: SECURE://kafka1:1093,SECURE://kafka2:2093,SECURE://kafka3:3093
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: PLAIN
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+          username="kafka" \
+          password="kafka";
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: 'true'
+
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry:8081
+
+      KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
+
+
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://kafka3:3090
+      #KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: http://0.0.0.0:3090
+      #KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: http://kafka3:3090
+      #KAFKA_CONFLUENT_METADATA_SERVER_BOOTSTRAP_SERVER: SASL_PLAINTEXT://kafka1:1093,SASL_PLAINTEXT://kafka2:2093,SASL_PLAINTEXT://kafka3:3093
+      #KAFKA_CONFLUENT_METADATA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      #KAFKA_CONFLUENT_METADATA_SERVER_SASL_MECHANISM: PLAIN
+      #KAFKA_CONFLUENT_METADATA_SERVER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka;
+
+      KAFKA_KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_KAFKA_REST_CLIENT_SASL_MECHANISM: PLAIN
+      KAFKA_KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka" password="kafka";
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf"
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+  schemaregistry:
+    image: confluentinc/cp-schema-registry:$TAG
+    hostname: schemaregistry
+    container_name: schemaregistry
+    restart: on-failure:3
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    ports:
+    - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry
+      SCHEMA_REGISTRY_GROUP_ID: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:1093,kafka2:2093,kafka3:3093'
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: PLAIN
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="schemaregistry" password="schemaregistry";
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_DEBUG: 'true'
+    networks:
+      example.com: {}
+
+  controlcenter:
+    image: confluentinc/cp-enterprise-control-center:$TAG
+    hostname: controlcenter
+    container_name: controlcenter
+    restart: always
+    volumes:
+      - ./secrets:/etc/kafka/secrets
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:1093,kafka2:2093,kafka3:3093
+      CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONTROL_CENTER_STREAMS_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka" password="kafka";
+      CONTROL_CENTER_STREAMS_SASL_MECHANISM: PLAIN
+      CONTROL_CENTER_STREAMS_CACHE_MAX_BYTES_BUFFERING: 100000000
+      CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
+      CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
+      CONTROL_CENTER_REPLICATION_FACTOR: 2
+
+      CONTROL_CENTER_REST_LISTENERS: http://0.0.0.0:9021
+
+      CONTROL_CENTER_CONNECT_CONNECT-CLUSTER_CLUSTER: http://connect:8083
+      CONTROL_CENTER_KSQL_KSQLCLUSTER_URL: http://ksqldb-server:8088
+      CONTROL_CENTER_SCHEMA_REGISTRY_SR1_URL: http://schemaregistry:8081
+
+      CONTROL_CENTER_STREAMS_CPREST_URL: http://kafka1:1090,http://kafka2:2090,http://kafka3:3090
+
+
+      CONTROL_CENTER_LOG4J_ROOT_LOGLEVEL: INFO
+    networks:
+      example.com: {}
+
+networks:
+  example.com:
+    name: "example.com"
+    driver: bridge
