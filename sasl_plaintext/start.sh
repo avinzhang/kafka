@@ -24,7 +24,6 @@ security.protocol=SASL_PLAINTEXT
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka" password="kafka";
 EOF'
 echo
-exit
 echo "Create ACLs for schema registry"
 docker-compose exec kafka1 kafka-acls --bootstrap-server kafka1:1093 --command-config /tmp/client.properties --add \
 --allow-principal User:'schemaregistry' --operation all --topic _schemas
