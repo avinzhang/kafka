@@ -74,3 +74,9 @@ echo
 echo ">> start C3"
 docker-compose up -d --build --no-deps controlcenter
 echo
+
+
+## Test kerberos ticket with keytab
+## kinit -kt /etc/kafka/secrets/kafka1.keytab kafka/kafka1.example.com@EXAMPLE.COM
+## kvno kafka/kafka1.example.com@EXAMPLE.COM
+## klist 
