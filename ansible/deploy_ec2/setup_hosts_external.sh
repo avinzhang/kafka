@@ -11,3 +11,4 @@ echo "`ansible aws_ec2 --list-hosts| tail -n +7|sed -n '1p' | awk '{print $1}'` 
 
 
 echo "`ansible aws_ec2 --list-hosts| tail -n +8|sed -n '1p' | awk '{print $1}'` openldap.example.com" >> /tmp/myhosts_external
+echo "`ansible aws_ec2 --list-hosts| tail -n +9|sed -n '1p' | awk '{print $1}'` schemaregistry.example.com" >> /tmp/myhosts_external

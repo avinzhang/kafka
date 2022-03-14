@@ -27,12 +27,12 @@ all:
     schema_registry_ldap_password: schemaregistry
     kafka_connect_ldap_user: connectAdmin
     kafka_connect_ldap_password: connectAdmin
-    ksql_ldap_user: ksqldb
-    ksql_ldap_password: ksqldb
+    ksql_ldap_user: ksqldbAdmin
+    ksql_ldap_password: ksqldbAdmin
     kafka_rest_ldap_user: restproxy
     kafka_rest_ldap_password: restproxy
-    control_center_ldap_user: controlcenter
-    control_center_ldap_password: controlcenter
+    control_center_ldap_user: c3Admin
+    control_center_ldap_password: c3Admin
     token_services_public_pem_file: '{{inventory_dir}}/mds_keys/public.pem'
     token_services_private_pem_file: '{{inventory_dir}}/mds_keys/keypair.pem'
     kafka_broker_principal:
@@ -64,14 +64,13 @@ kafka_broker:
       ldap.java.naming.security.credentials: admin
       ldap.java.naming.security.authentication: simple
       ldap.search.mode: GROUPS
-      ldap.user.search.base: OU=Users,DC=example,DC=com
+      ldap.user.search.base: OU=users,DC=example,DC=com
       ldap.user.name.attribute: uid
       ldap.user.object.class: inetOrgPerson
-      #ldap.user.memberof.attribute.pattern: CN=(.*),OU=users,DC=example,DC=com
       ldap.group.name.attribute: cn
       ldap.group.member.attribute.pattern: cn=(.*),ou=users,DC=example,DC=com
       ldap.group.member.attribute: member
-      ldap.group.search.base: DC=example,DC=com
+      ldap.group.search.base: ou=groups,dc=example,dc=com
       ldap.group.object.class: groupOfNames
   hosts:
     kafka1.example.com:

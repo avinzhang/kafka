@@ -94,7 +94,7 @@ aws_ec2_instances:
   security_group: avin-sg
   region: "{{ aws_region }}"
   volume_size: 10
-  exact_count: 7
+  exact_count: 8
   delete_vol_on_termination: yes
   sshkey_name: "{{ aws_keypair_name }}"
 
