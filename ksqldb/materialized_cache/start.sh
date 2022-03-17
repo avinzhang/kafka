@@ -5,6 +5,7 @@ export TAG=7.0.1
 echo "----Download  connector-----------"
 mkdir -p ./jar/debezium
 ls jar/debezium-debezium-connector-mysql/lib/debezium-connector-mysql-*.jar || confluent-hub install  --component-dir ./jar debezium/debezium-connector-mysql:1.1.0
+ls ./jar/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar confluentinc/kafka-connect-datagen:latest --no-prompt
 echo "Done"
 echo
 echo
@@ -25,6 +26,7 @@ do
     fi
     sleep 5
 done
+exit
 docker-compose exec mysql bash -c "mysql -uroot -proot <<EOF
 GRANT ALL PRIVILEGES ON *.* TO 'example-user' WITH GRANT OPTION;
 ALTER USER 'example-user'@'%' IDENTIFIED WITH mysql_native_password BY 'example-pw';
@@ -52,7 +54,7 @@ CREATE SOURCE CONNECTOR calls_reader WITH (
 exit;
 EOF" 
 
-sleep 3
+sleep 5
 echo 
 echo 
 echo "Create materialized views"
@@ -99,5 +101,34 @@ EOF"
 
 
 
+
+echo 
+echo "---Create datagen connector"
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+SET 'auto.offset.reset'='earliest';
+CREATE SOURCE CONNECTOR datagenusers WITH (
+    'connector.class' = 'io.confluent.kafka.connect.datagen.DatagenConnector',
+    'quickstart' = 'users',
+    'kafka.topic' = 'users',
+    'max.interval' = '1000',
+    'key.converter' = 'org.apache.kafka.connect.storage.StringConverter',
+    'value.converter' = 'io.confluent.connect.avro.AvroConverter',
+    'iterations' = '1000000000',
+    'key.converter.schema.registry.url' = 'http://schemaregistry:8081',
+    'value.converter.schema.registry.url' = 'http://schemaregistry:8081'
+);
+
+CREATE SOURCE CONNECTOR datagenpageviews WITH (
+    'connector.class' = 'io.confluent.kafka.connect.datagen.DatagenConnector',
+    'quickstart' = 'pageviews',
+    'kafka.topic' = 'pageviews',
+    'max.interval' = '1000',
+    'key.converter' = 'org.apache.kafka.connect.storage.StringConverter',
+    'value.converter' = 'io.confluent.connect.avro.AvroConverter',
+    'iterations' = '1000000000',
+    'key.converter.schema.registry.url' = 'http://schemaregistry:8081',
+    'value.converter.schema.registry.url' = 'http://schemaregistry:8081'
+exit;
+EOF"
 
 
