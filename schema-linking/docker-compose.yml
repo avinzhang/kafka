@@ -175,8 +175,6 @@ services:
     hostname: controlcenter
     container_name: controlcenter
     restart: always
-    volumes:
-      - ./secrets:/etc/kafka/secrets
     ports:
       - "9021:9021"
     environment:
