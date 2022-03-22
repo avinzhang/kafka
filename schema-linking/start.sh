@@ -39,17 +39,62 @@ docker-compose up -d --build --no-deps controlcenter
 echo
 
 
-echo "Register schema on kafka1"
-curl -X POST -H "Content-Type: application/json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Users\",\"fields\":[{\"name\":\"Name\",\"type\":\"string\"},{\"name\":\"Age\",\"type\":\"int\"},{\"name\":\"Phone\",\"type\":\"int\"}]}"}' http://localhost:1081/subjects/users-value/versions
+echo ">>Register schemas on schemaregistry1"
+curl -s -X POST -H "Content-Type: application/json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Users\",\"fields\":[{\"name\":\"Name\",\"type\":\"string\"},{\"name\":\"Age\",\"type\":\"int\"},{\"name\":\"Phone\",\"type\":\"int\"}]}"}' http://localhost:1081/subjects/:.people:users/versions
+#curl -s http://localhost:1081/subjects/:.people:users/versions/1
+echo
+echo
+cat << EOF > /tmp/test.avro
+{
+      "schema":
+        "{
+               \"type\": \"record\",
+               \"connect-name\": \"myname\",
+               \"connect-donuts\": \"mydonut\",
+               \"name\": \"test\",
+               \"doc\": \"some doc info\",
+                 \"fields\":
+                   [
+                     {
+                       \"type\": \"string\",
+                       \"doc\": \"doc for field1\",
+                       \"name\": \"field1\"
+                     },
+                     {
+                       \"type\": \"int\",
+                       \"doc\": \"doc for field2\",
+                       \"name\": \"field2\"
+                     }
+                   ]
+               }"
+     }
+EOF
+curl -s -X POST -H "Content-Type: application/json" --data @/tmp/test.avro http://localhost:1081/subjects/donuts/versions
 
-echo "List the schema"
-curl -s http://localhost:1081/subjects/users-value/versions/1
+echo 
+echo ">>Check schemas on schemeregistry1"
+curl --silent -X GET http://localhost:1081/subjects?subjectPrefix=":*:" | jq
 
-echo "Create exporter on source schema registry"
-echo "schema.registry.url=http://localhost:2081" > ./config.txt
-schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url http://localhost:1081/ --config-file ./config.txt
 
-echo "List schema exporter"
-schema-exporter --list --schema.registry.url http://localhost:1081
+echo ">>Create exporter on source schema registry"
+docker-compose exec schemaregistry1 bash -c 'cat << EOF > /tmp/config.txt
+schema.registry.url=http://schemaregistry2:2081
+EOF'
+docker-compose exec schemaregistry1 schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url http://schemaregistry1:1081/ --config-file /tmp/config.txt
 
-#currently schema-exporter doesn't work, it could be it's still in preview mode
+echo ">>List schema exporter"
+docker-compose exec schemaregistry1 schema-exporter --list --schema.registry.url http://schemaregistry1:1081
+
+echo
+echo ">>Describe schema exporter"
+docker-compose exec schemaregistry1 schema-exporter --describe --name myschemalink --schema.registry.url http://schemaregistry1:1081
+
+echo
+echo ">>Get status of exporter"
+docker-compose exec schemaregistry1 schema-exporter --get-status --name myschemalink --schema.registry.url http://schemaregistry1:1081
+echo
+echo
+echo ">>Check schemas on schemaregistry2"
+curl --silent -X GET http://localhost:2081/subjects?subjectPrefix=":*:" | jq
+
+# schema exporter is in preview, doesn't support ssl settings on source schema registry
