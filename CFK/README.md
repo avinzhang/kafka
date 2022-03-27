@@ -37,6 +37,10 @@
     ```
     eksctl scale nodegroup --cluster=avin-eks --nodes=0 --nodes-min=0 --name=eks-ng
     ```
+    * Write credential to kubeconfig
+    ```
+    eksctl utils write-kubeconfig --cluster=avin-eks
+    ```
 
   * AKS
     * Install azure cli
