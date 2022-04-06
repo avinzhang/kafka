@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.0.1
+export TAG=7.1.0
 
 echo "----------Start zookeeper and broker -------------"
 docker-compose up -d --build --no-deps zookeeper1 zookeeper2 kafka1 kafka2 schemaregistry1 schemaregistry2
@@ -34,10 +34,6 @@ do
 done
 echo
 echo
-echo ">> start C3"
-docker-compose up -d --build --no-deps controlcenter
-echo
-
 
 echo ">>Register schemas on schemaregistry1"
 curl -s -X POST -H "Content-Type: application/json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Users\",\"fields\":[{\"name\":\"Name\",\"type\":\"string\"},{\"name\":\"Age\",\"type\":\"int\"},{\"name\":\"Phone\",\"type\":\"int\"}]}"}' http://localhost:1081/subjects/:.people:users/versions
@@ -97,4 +93,4 @@ echo
 echo ">>Check schemas on schemaregistry2"
 curl --silent -X GET http://localhost:2081/subjects?subjectPrefix=":*:" | jq
 
-# schema exporter is in preview, doesn't support ssl settings on source schema registry
+

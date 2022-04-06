@@ -143,16 +143,12 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schemaregistry
       SCHEMA_REGISTRY_GROUP_ID: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:1093'
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: DEBUG
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:1081
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:1081
       SCHEMA_REGISTRY_DEBUG: 'true'
       SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.schema.exporter.SchemaExporterResourceExtension
       SCHEMA_REGISTRY_KAFKASTORE_UPDATE_HANDLERS: io.confluent.schema.exporter.storage.SchemaExporterUpdateHandler
       SCHEMA_REGISTRY_PASSWORD_ENCODER_SECRET: password
-    volumes:
-      - ./plugin:/usr/share/java/schema-registry-plugins
-      - ./plugin/schema-exporter:/bin/schema-exporter
     networks:
       example.com: {}
 
@@ -169,47 +165,15 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schemaregistry
       SCHEMA_REGISTRY_GROUP_ID: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka2:2093'
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:2081
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
       SCHEMA_REGISTRY_DEBUG: 'true'
       SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.schema.exporter.SchemaExporterResourceExtension
       SCHEMA_REGISTRY_KAFKASTORE_UPDATE_HANDLERS: io.confluent.schema.exporter.storage.SchemaExporterUpdateHandler
       SCHEMA_REGISTRY_PASSWORD_ENCODER_SECRET: password
-    volumes:
-      - ./plugin:/usr/share/java/schema-registry-plugins
-      - ./plugin/schema-exporter:/bin/schema-exporter
     networks:
       example.com: {}
 
-  controlcenter:
-    image: confluentinc/cp-enterprise-control-center:$TAG
-    hostname: controlcenter
-    container_name: controlcenter
-    restart: always
-    ports:
-      - "9021:9021"
-    environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:1093
-      CONTROL_CENTER_STREAMS_CACHE_MAX_BYTES_BUFFERING: 100000000
-      CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
-      CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
-      CONTROL_CENTER_INTERNAL_TOPICS_REPLICATION: 1
-      CONTROL_CENTER_REPLICATION_FACTOR: 1
-      CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
-
-      CONTROL_CENTER_REST_LISTENERS: http://0.0.0.0:9021
-      CONTROL_CENTER_KAFKA_CLUSTER2_BOOTSTRAP_SERVERS: kafka2:2093
-
-      CONTROL_CENTER_SCHEMA_REGISTRY_URL: http://schemaregistry1:1081
-      CONTROL_CENTER_SCHEMA_REGISTRY_SR2_URL: http://schemaregistry2:2081
-      CONTROL_CENTER_STREAMS_CPREST_URL: http://kafka1:1090
-      CONTROL_CENTER_KAFKA_CLUSTER2_CPREST_URL: http://kafka2:2090
-
-
-      CONTROL_CENTER_LOG4J_ROOT_LOGLEVEL: INFO
-    networks:
-      example.com: {}
 
 networks:
   example.com:
