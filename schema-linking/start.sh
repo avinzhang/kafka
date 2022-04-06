@@ -76,7 +76,7 @@ echo ">>Create exporter on source schema registry"
 docker-compose exec schemaregistry1 bash -c 'cat << EOF > /tmp/config.txt
 schema.registry.url=http://schemaregistry2:2081
 EOF'
-docker-compose exec schemaregistry1 schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url http://schemaregistry1:1081/ --config-file /tmp/config.txt
+docker-compose exec schemaregistry1 schema-exporter --create --name myschemalink --context-name myschemalink --subjects ":*:" --schema.registry.url http://schemaregistry1:1081/ --config-file /tmp/config.txt
 
 echo ">>List schema exporter"
 docker-compose exec schemaregistry1 schema-exporter --list --schema.registry.url http://schemaregistry1:1081
