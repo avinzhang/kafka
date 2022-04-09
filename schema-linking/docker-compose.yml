@@ -65,7 +65,6 @@ services:
 
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       
-
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
 
       KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"

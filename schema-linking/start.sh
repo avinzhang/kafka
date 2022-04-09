@@ -1,21 +1,46 @@
 #!/bin/bash
 
+alias docker=/usr/local/bin/nerdctl
 export TAG=7.1.0
 
 echo "----------Start zookeeper and broker -------------"
-docker-compose up -d --build --no-deps zookeeper1 zookeeper2 kafka1 kafka2 schemaregistry1 schemaregistry2
-echo "Done"
+docker compose up -d --build --no-deps zookeeper1 zookeeper2 
+STARTED=false
+while [ $STARTED == false ]
+do
+    docker compose logs zookeeper1 | grep "binding to port" &> /dev/null
+    if [ $? -eq 0 ]; then
+      STARTED=true
+      echo "ZK1 is started and ready"
+    else
+      echo "Waiting for ZK1 to start..."
+    fi
+    sleep 5
+done
+STARTED=false
+while [ $STARTED == false ]
+do
+    docker compose logs zookeeper2 | grep "binding to port" &> /dev/null
+    if [ $? -eq 0 ]; then
+      STARTED=true
+      echo "ZK2 is started and ready"
+    else
+      echo "Waiting for ZK2 to start..."
+    fi
+    sleep 5
+done
+docker compose up -d --build --no-deps kafka1 kafka2 
 echo
 echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker-compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    docker compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
     if [ $? -eq 0 ]; then
       MDS_STARTED=true
       echo "kafka1 is started and ready"
     else
-      echo "Waiting for MDS to start..."
+      echo "Waiting for kafka1 to start..."
     fi
     sleep 5
 done
@@ -23,27 +48,41 @@ done
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker-compose logs kafka2 | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    docker compose logs kafka2 | grep "Started NetworkTrafficServerConnector" &> /dev/null
     if [ $? -eq 0 ]; then
       MDS_STARTED=true
       echo "Kafka2 is started and ready"
     else
-      echo "Waiting for MDS to start..."
+      echo "Waiting for kafka2 to start..."
     fi
     sleep 5
 done
 echo
 echo
+docker compose up -d --build --no-deps schemaregistry1 schemaregistry2 
 
 STARTED=false
 while [ $STARTED == false ]
 do
-    docker-compose logs schemaregistry1 | grep "Server started" &> /dev/null
+    docker compose logs schemaregistry1 | grep "Server started" &> /dev/null
     if [ $? -eq 0 ]; then
       STARTED=true
       echo "SR1 is started and ready"
     else
       echo "Waiting for SR1 to start..."
+    fi
+    sleep 5
+done
+
+STARTED=false
+while [ $STARTED == false ]
+do
+    docker compose logs schemaregistry2 | grep "Server started" &> /dev/null
+    if [ $? -eq 0 ]; then
+      STARTED=true
+      echo "SR2 is started and ready"
+    else
+      echo "Waiting for SR2 to start..."
     fi
     sleep 5
 done
