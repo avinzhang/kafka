@@ -27,6 +27,7 @@ services:
   zookeeper1:
     cpus: 0.7
     image: confluentinc/cp-zookeeper:$TAG
+    platform: linux/amd64
     hostname: zookeeper1
     container_name: zookeeper1
     ports:
@@ -54,9 +55,10 @@ services:
   kafka1:
     cpus: 0.7
     image: confluentinc/cp-server:$TAG
+    platform: linux/amd64
     hostname: kafka1
     container_name: kafka1
-    restart: on-failure:3
+    restart: always
     volumes:
     - ./secrets:/etc/kafka/secrets
     ports:
@@ -215,9 +217,10 @@ services:
 
   schemaregistry1:
     image: confluentinc/cp-schema-registry:$TAG
+    platform: linux/amd64
     hostname: schemaregistry1
     container_name: schemaregistry1
-    restart: on-failure:3
+    restart: always
     depends_on:
       - kafka1
     volumes:
@@ -278,6 +281,7 @@ services:
   zookeeper2:
     cpus: 0.7
     image: confluentinc/cp-zookeeper:$TAG
+    platform: linux/amd64
     hostname: zookeeper2
     container_name: zookeeper2
     ports:
@@ -305,9 +309,10 @@ services:
   kafka2:
     cpus: 0.7
     image: confluentinc/cp-server:$TAG
+    platform: linux/amd64
     hostname: kafka2
     container_name: kafka2
-    restart: on-failure:3
+    restart: always
     volumes:
     - ./secrets:/etc/kafka/secrets
     ports:
@@ -465,9 +470,10 @@ services:
 
   schemaregistry2:
     image: confluentinc/cp-schema-registry:$TAG
+    platform: linux/amd64
     hostname: schemaregistry2
     container_name: schemaregistry2
-    restart: on-failure:3
+    restart: always
     depends_on:
       - kafka2
     volumes:

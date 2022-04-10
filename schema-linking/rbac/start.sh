@@ -3,13 +3,13 @@
 export TAG=7.1.0
 
 echo "----------Start Openldap---------"
-docker-compose up -d --build --no-deps openldap
+docker compose up -d --build --no-deps openldap
 echo "Done"
 echo
 STARTED=false
 while [ $STARTED == false ]
 do
-    docker-compose logs openldap | grep "started" &> /dev/null
+    docker compose logs openldap | grep "started" &> /dev/null
     if [ $? -eq 0 ]; then
       STARTED=true
       echo "Openldap is started and ready"
@@ -20,14 +20,14 @@ do
 done
 echo
 echo "----------Start zookeeper and broker -------------"
-docker-compose up -d --build --no-deps zookeeper1 kafka1 zookeeper2 kafka2 
+docker compose up -d --build --no-deps zookeeper1 kafka1 zookeeper2 kafka2 
 echo "Done"
 echo
 echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker-compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    docker compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
     if [ $? -eq 0 ]; then
       MDS_STARTED=true
       echo "MDS is started and ready"
@@ -59,7 +59,7 @@ fi
 echo "Cluster ID is $KAFKA_CLUSTER_ID"
 echo
 echo "Setup config file for token port"
-docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/client-rbac.properties
+docker compose exec kafka1 bash -c 'cat << EOF > /tmp/client-rbac.properties
 sasl.mechanism=OAUTHBEARER
 security.protocol=SASL_SSL
 ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
@@ -69,7 +69,7 @@ sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginMo
 EOF'
 echo
 echo "Setup config for mTls port"
-docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/client-ssl.properties
+docker compose exec kafka1 bash -c 'cat << EOF > /tmp/client-ssl.properties
 security.protocol=SSL
 ssl.keystore.location=/etc/kafka/secrets/client.keystore.jks
 ssl.keystore.password=confluent
@@ -102,13 +102,13 @@ do
 done
 echo
 echo ">> Starting up schema registry"
-docker-compose up -d --build --no-deps schemaregistry1 &>/dev/null
+docker compose up -d --build --no-deps schemaregistry1 &>/dev/null
 echo
 echo
 STARTED=false
 while [ $STARTED == false ]
 do
-    docker-compose logs schemaregistry1 | grep "Server started" &> /dev/null
+    docker compose logs schemaregistry1 | grep "Server started" &> /dev/null
     if [ $? -eq 0 ]; then
       STARTED=true
       echo "SR1 is started and ready"
@@ -128,7 +128,7 @@ echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker-compose logs kafka2 | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    docker compose logs kafka2 | grep "Started NetworkTrafficServerConnector" &> /dev/null
     if [ $? -eq 0 ]; then
       MDS_STARTED=true
       echo "MDS is started and ready"
@@ -160,7 +160,7 @@ fi
 echo "Cluster ID is $KAFKA_CLUSTER_ID"
 echo
 echo "Setup config file for token port"
-docker-compose exec kafka2 bash -c 'cat << EOF > /tmp/client-rbac-cluster2.properties
+docker compose exec kafka2 bash -c 'cat << EOF > /tmp/client-rbac-cluster2.properties
 bootstrap.servers=kafka2:2093
 sasl.mechanism=OAUTHBEARER
 security.protocol=SASL_SSL
@@ -170,7 +170,7 @@ sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="user2" password="user2" metadataServerUrls="https://kafka2:2090";
 EOF'
 echo
-docker-compose exec kafka2 bash -c 'cat << EOF > /tmp/client-rbac-cluster1.properties
+docker compose exec kafka2 bash -c 'cat << EOF > /tmp/client-rbac-cluster1.properties
 bootstrap.servers=kafka1:1093
 sasl.mechanism=OAUTHBEARER
 security.protocol=SASL_SSL
@@ -205,12 +205,12 @@ do
 done
 echo
 echo ">> Starting up schema registry"
-docker-compose up -d --build --no-deps schemaregistry2 &>/dev/null
+docker compose up -d --build --no-deps schemaregistry2 &>/dev/null
 echo
 STARTED=false
 while [ $STARTED == false ]
 do
-    docker-compose logs schemaregistry2 | grep "Server started" &> /dev/null
+    docker compose logs schemaregistry2 | grep "Server started" &> /dev/null
     if [ $? -eq 0 ]; then
       STARTED=true
       echo "SR2 is started and ready"
@@ -285,22 +285,22 @@ curl -u user1:user1 --cacert ./secrets/ca.crt -H "Content-Type:application/json"
 
 
 #echo ">>Create config for SR2"
-#docker-compose exec schemaregistry1 bash -c 'cat << EOF > /tmp/config.txt
+#docker compose exec schemaregistry1 bash -c 'cat << EOF > /tmp/config.txt
 #schema.registry.url=https://schemaregistry2:2081
 #schema.registry.ssl.truststore.location=/etc/kafka/secrets/schemaregistry1.truststore.jks
 #schema.registry.ssl.trustsotre.password=confluent
 #basic.auth.credentials.source=USER_INFO
 #basic.auth.user.info=user2:user2
 #EOF'
-#docker-compose exec schemaregistry1 bash -c 'SCHEMA_REGISTRY_OPTS="-Djavax.net.ssl.trustStore=/etc/kafka/secrets/client.truststore.jks -Djavax.net.ssl.trustStorePassword=confluent" schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url https://schemaregistry1:1081/ --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO --config-file /tmp/config.txt'
-#docker-compose exec schemaregistry1 bash -c "schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url https://schemaregistry1:1081/ --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO --config-file /tmp/config.txt"
+#docker compose exec schemaregistry1 bash -c 'SCHEMA_REGISTRY_OPTS="-Djavax.net.ssl.trustStore=/etc/kafka/secrets/client.truststore.jks -Djavax.net.ssl.trustStorePassword=confluent" schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url https://schemaregistry1:1081/ --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO --config-file /tmp/config.txt'
+#docker compose exec schemaregistry1 bash -c "schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url https://schemaregistry1:1081/ --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO --config-file /tmp/config.txt"
 #SCHEMA_REGISTRY_OPTS="-Djavax.net.ssl.trustStore.location=./secrets/schemaregistry1.truststore.jks -Djavax.net.ssl.trustStore.password=confluent" schema-exporter --create --name myschemalink --subjects ":*:" --schema.registry.url https://localhost:1081/ --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO --config-file /tmp/config.txt
 echo
 
 echo
 echo ">>List schema exporter"
 curl -u user1:user1 --cacert ./secrets/ca.crt https://localhost:1081/exporters
-#docker-compose exec schemaregistry1 schema-exporter --list --schema.registry.url https://schemaregistry1:1081 --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO
+#docker compose exec schemaregistry1 schema-exporter --list --schema.registry.url https://schemaregistry1:1081 --basic.auth.user.info user1:user1 --basic.auth.credentials.source USER_INFO
 
 sleep 5
 echo
