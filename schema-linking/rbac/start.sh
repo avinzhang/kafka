@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.0
+export TAG=7.1.0.arm64
 
 echo "----------Start Openldap---------"
 docker compose up -d --build --no-deps openldap

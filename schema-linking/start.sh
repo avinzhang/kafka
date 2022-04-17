@@ -1,7 +1,6 @@
 #!/bin/bash
 
-alias docker=/usr/local/bin/nerdctl
-export TAG=7.1.0
+export TAG=7.1.0.arm64
 
 echo "----------Start zookeeper and broker -------------"
 docker compose up -d --build --no-deps zookeeper1 zookeeper2 
