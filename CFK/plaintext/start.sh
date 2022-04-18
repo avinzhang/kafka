@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-export TAG=7.0.0
-export INIT_TAG=2.2.0
+export TAG=7.1.0
+export INIT_TAG=2.3.0
 echo "Starting up Confluent for Kubernetes"
 echo
 echo
