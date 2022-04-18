@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.0.0
+export TAG=7.1.0.arm64
 datagen_version=latest
 
 echo "----Download datagen connector-----------"
@@ -10,13 +10,13 @@ echo "Done"
 echo
 echo
 echo "----Start everything up with version $TAG------------"
-docker-compose up -d --build --no-deps zookeeper kafka connect schemaregistry ksqldb-server restproxy controlcenter #&>/dev/null
+docker compose up -d --build --no-deps zookeeper kafka connect schemaregistry ksqldb-server restproxy controlcenter #&>/dev/null
 echo
 echo
 connect_ready=false
 while [ $connect_ready == false ]
 do
-    docker-compose logs connect|grep "Herder started" &> /dev/null
+    docker compose logs connect|grep "Herder started" &> /dev/null
     if [ $? -eq 0 ]; then
       connect_ready=true
       echo "*** Kafka Connect is ready ****"
@@ -42,7 +42,7 @@ echo
 ksql_ready=false
 while [ $ksql_ready == false ]
 do
-    docker-compose logs ksqldb-server|grep "Server up and running" &> /dev/null
+    docker compose logs ksqldb-server|grep "Server up and running" &> /dev/null
     if [ $? -eq 0 ]; then
       ksql_ready=true
       echo "*** ksqldb is ready ****"
@@ -52,7 +52,7 @@ do
     sleep 5
 done
 echo "----Create ksqldb streams----------------"
-docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', REPLICAS=1, VALUE_FORMAT='AVRO');
 CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
@@ -65,7 +65,7 @@ echo "* Creating ktable users ....done"
 echo "* Creating kstream pageviews ....done"
 echo "* Creating persistent kstream pageviews_female ....done"
 echo "* Creating persistent kstream pageviews_female_like_89 ....done"
-cho "* Creating persistent ktable pageviews_region .....done"
+echo "* Creating persistent ktable pageviews_region .....done"
 
 
 
