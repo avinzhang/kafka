@@ -22,12 +22,12 @@ EXPOSE 8088
 
 USER root
 
-#ADD --chown=appuser:appuser target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/java/${ARTIFACT_ID}/* /usr/share/java/${COMPONENT}/
+ADD --chown=appuser:appuser artifacts/* /usr/share/java/${COMPONENT}/
 #ADD --chown=appuser:appuser target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/doc/* /usr/share/doc/${ARTIFACT_ID}/
-#ADD --chown=appuser:appuser target/dependency/ksqldb-console-scripts-*/* /usr/bin/
-#ADD --chown=appuser:appuser target/dependency/ksqldb-etc-*/* /etc/ksqldb/
+ADD --chown=appuser:appuser ksqldb-console-scripts-*/* /usr/bin/
+ADD --chown=appuser:appuser ksqldb-etc-*/* /etc/ksqldb/
 
-#COPY --chown=appuser:appuser target/dependency/ksqldb-etc-*/* /etc/confluent/docker/
+COPY --chown=appuser:appuser ksqldb-etc-*/* /etc/confluent/docker/
 COPY --chown=appuser:appuser include/etc/confluent/docker/* /etc/confluent/docker/
 
 RUN mkdir -p /etc/${COMPONENT} /etc/${COMPONENT}/secrets /usr/logs \
