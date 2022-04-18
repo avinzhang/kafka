@@ -55,7 +55,7 @@ services:
       example.com: {}
 
   schemaregistry:
-    image: confluentinc/cp-schema-registry:$TAG
+    image: arm64/cp-schema-registry:$TAG
     hostname: schemaregistry
     container_name: schemaregistry
     restart: on-failure:3
@@ -74,7 +74,7 @@ services:
       example.com: {}
 
   ksqldb-server:
-    image: confluentinc/cp-ksqldb-server:$TAG
+    image: arm64/cp-ksqldb-server:$TAG
     hostname: ksqldb-server
     container_name: ksqldb-server
     restart: always
@@ -119,6 +119,7 @@ services:
   mysql:
     image: mysql:5.7
     hostname: mysql
+    platform: linux/amd64
     container_name: mysql
     ports:
       - "3306:3306"
