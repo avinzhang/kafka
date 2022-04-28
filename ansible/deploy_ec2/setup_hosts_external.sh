@@ -1,14 +1,43 @@
 #!/bin/bash
 
-echo "`ansible aws_ec2 --list-hosts| tail -n +2|sed -n '1p' | awk '{print $1}'` openldap.example.com" > /tmp/myhosts_external
-echo "`ansible aws_ec2 --list-hosts| tail -n +3|sed -n '1p' | awk '{print $1}'` zookeeper1.example.com" >> /tmp/myhosts_external
-echo "`ansible aws_ec2 --list-hosts| tail -n +4|sed -n '1p' | awk '{print $1}'` zookeeper2.example.com" >> /tmp/myhosts_external
-echo "`ansible aws_ec2 --list-hosts| tail -n +5|sed -n '1p' | awk '{print $1}'` zookeeper3.example.com" >> /tmp/myhosts_external
-
-
-echo "`ansible aws_ec2 --list-hosts| tail -n +6|sed -n '1p' | awk '{print $1}'` kafka1.example.com" >> /tmp/myhosts_external
-echo "`ansible aws_ec2 --list-hosts| tail -n +7|sed -n '1p' | awk '{print $1}'` kafka2.example.com" >> /tmp/myhosts_external
-echo "`ansible aws_ec2 --list-hosts| tail -n +8|sed -n '1p' | awk '{print $1}'` kafka3.example.com" >> /tmp/myhosts_external
-
-echo "`ansible aws_ec2 --list-hosts| tail -n +9|sed -n '1p' | awk '{print $1}'` schemaregistry.example.com" >> /tmp/myhosts_external
+EC2_HOSTS=(`ansible aws_ec2 --list-hosts | tail -n +2|awk '{print $1}'`)
+NUM=0
+while [ $NUM -lt ${#EC2_HOSTS[@]} ]
+  do
+    if [ $NUM -eq 0 ]
+      then
+        echo "${EC2_HOSTS[$NUM]} openldap.example.com" > /tmp/myhosts_external
+    elif [ $NUM -eq 1 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} zookeeper1.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 2 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} zookeeper2.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 3 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} zookeeper3.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 4 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} kafka1.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 5 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} kafka2.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 6 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} kafka3.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 7 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} schemaregistry.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 8 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} connect.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 9 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} ksqldb.example.com" >> /tmp/myhosts_external
+    elif [ $NUM -eq 10 ]
+    then
+      echo "${EC2_HOSTS[$NUM]} controlcenter.example.com" >> /tmp/myhosts_external
+    fi
+    NUM=$((NUM+1))
+done
 
