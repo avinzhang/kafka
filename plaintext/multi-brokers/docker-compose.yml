@@ -168,7 +168,7 @@ services:
       example.com: {}
 
   schemaregistry:
-    image: confluentinc/cp-schema-registry:$TAG
+    image: arm64/cp-schema-registry:$TAG
     hostname: schemaregistry
     container_name: schemaregistry
     restart: on-failure:3
@@ -190,7 +190,7 @@ services:
       example.com: {}
 
   connect:
-    image: confluentinc/cp-server-connect:$TAG
+    image: arm64/cp-server-connect:$TAG
     hostname: connect
     container_name: connect
     restart: always
@@ -228,7 +228,7 @@ services:
       example.com: {}
 
   ksqldb-server:
-    image: confluentinc/cp-ksqldb-server:$TAG
+    image: arm64/cp-ksqldb-server:$TAG
     hostname: ksqldb-server
     container_name: ksqldb-server
     restart: always
@@ -260,7 +260,7 @@ services:
       example.com: {}
 
   controlcenter:
-    image: confluentinc/cp-enterprise-control-center:$TAG
+    image: arm64/cp-enterprise-control-center:$TAG
     hostname: controlcenter
     container_name: controlcenter
     restart: always

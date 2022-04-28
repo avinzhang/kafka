@@ -1,16 +1,16 @@
 #!/bin/bash
 
-export TAG=7.0.1
+export TAG=7.1.0.arm64
 
 echo "----------Start zookeeper and broker -------------"
-docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3 schemaregistry
+docker compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3 schemaregistry
 echo "Done"
 echo
 echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker-compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    docker compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
     if [ $? -eq 0 ]; then
       MDS_STARTED=true
       echo "MDS is started and ready"
@@ -19,7 +19,7 @@ do
     fi
     sleep 5
 done
-
+exit
 echo
 echo ">> Download datagen connector"
 mkdir -p ./jar/datagen
@@ -29,13 +29,13 @@ echo ">> Download replicator connector"
 ls ./jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-*.jar || confluent-hub install --no-prompt --component-dir ./jar confluentinc/kafka-connect-replicator:latest
 echo
 echo ">> Starting up Kafka connect"
-docker-compose up -d --build --no-deps connect
+docker compose up -d --build --no-deps connect
 echo
 echo
 CONNECT_STARTED=false
 while [ $CONNECT_STARTED == false ]
 do
-    docker-compose logs connect | grep "Herder started" &> /dev/null
+    docker compose logs connect | grep "Herder started" &> /dev/null
     if [ $? -eq 0 ]; then
       CONNECT_STARTED=true
       echo "Kafka connect is started and ready"
@@ -101,14 +101,14 @@ echo "-----Setup ksqldb-----------"
 echo
 echo
 echo ">> Start ksqldb server"
-docker-compose up -d --build --no-deps ksqldb-server
+docker compose up -d --build --no-deps ksqldb-server
 echo
 
 echo "Waiting"
 KSQL_STARTED=false
 while [ $KSQL_STARTED == false ]
 do
-    docker-compose logs ksqldb-server | grep "Server up and running" &> /dev/null
+    docker compose logs ksqldb-server | grep "Server up and running" &> /dev/null
     if [ $? -eq 0 ]; then
       KSQL_STARTED=true
       echo "KSQLDB is started and ready"
@@ -121,7 +121,7 @@ echo
 
 echo
 echo "Start ksql streams and queries"
-docker-compose exec ksqldb-server bash -c "ksql http://localhost:8088 <<EOF
+docker compose exec ksqldb-server bash -c "ksql http://localhost:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', VALUE_FORMAT='AVRO');
 CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
@@ -134,5 +134,5 @@ EOF"
 
 echo
 echo ">> start C3"
-docker-compose up -d --build --no-deps controlcenter
+docker compose up -d --build --no-deps controlcenter
 echo
