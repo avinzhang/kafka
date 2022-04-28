@@ -44,7 +44,7 @@ terraform apply -target=confluentcloud_kafka_topic.orders -target=confluentcloud
 
 echo
 echo
-echo ">>>Get create topic"
+echo ">>>Inspect created topic"
 confluent kafka topic list --cluster $CLUSTER_ID
 echo
 echo ">>>Inspect ACLs"
