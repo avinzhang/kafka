@@ -5,6 +5,7 @@ filters:
   tag:Environment: avin
   instance-state-name: running
 hostnames:
+  #- dns-name
   - name: "private-ip-address"
     separator: ' || '
     prefix: "ip-address"
