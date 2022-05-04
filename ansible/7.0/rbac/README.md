@@ -85,3 +85,16 @@ yum -y install jq curl
     confluent iam rolebinding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:user1 --role ClusterAdmin --ksql-cluster-id ksql-server
     ```
 
+    * setup properties
+    ```
+    cat << EOF > /tmp/client-rbac.properties
+    sasl.mechanism=OAUTHBEARER
+    security.protocol=SASL_SSL
+    ssl.truststore.location=/var/ssl/private/kafka_broker.truststore.jks
+    ssl.truststore.password=confluent
+    sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+    sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="mds" password="mds" metadataServerUrls="https://kafka1.example.com:8090";
+    EOF
+    ```
+
+
