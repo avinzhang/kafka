@@ -1,0 +1,75 @@
+---
+- hosts: all
+  tasks:
+  #- name: stop zookeeper service
+  #  systemd:
+  #    state: stopped
+  #    name: confluent-zookeeper
+  #  tags: zookeeper
+
+  - name: stop broker service
+    systemd:
+      state: stopped
+      name: confluent-server
+    tags: kafka_broker
+
+  - name: remove zookeeper packages
+    yum:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+    - confluent-common
+    - confluent-rest-utils
+    - confluent-metadata-service
+    - confluent-ce-kafka-http-server
+    - confluent-kafka-rest
+    - confluent-server-rest
+    - confluent-telemetry 
+    - confluent-server
+    tags: zookeeper
+
+  - name: clean up transactions
+    command: yum-complete-transaction --cleanup-only
+    tags: 
+    - always
+
+  - name: remove broker packages
+    yum:
+      state: absent
+      name: "{{ item }}"
+    with_items:
+    - confluent-common
+    - confluent-rest-utils
+    - confluent-metadata-service
+    - confluent-ce-kafka-http-server
+    - confluent-kafka-rest
+    - confluent-server-rest
+    - confluent-telemetry
+    - confluent-server
+    - confluent-security
+    - confluent-rebalancer
+    tags: kafka_broker
+
+  - name: remove zookeeper related directories
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /etc/kafka
+    - /var/ssl/private
+    - /var/log/kafka
+    - /var/log/confluent
+    tags:
+    - zookeeper
+
+  - name: remove broker related directories
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /etc/kafka
+    - /var/ssl/private
+    - /var/log/kafka
+    - /var/log/confluent
+    tags:
+    - kafka_broker
