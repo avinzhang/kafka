@@ -52,6 +52,17 @@
       confluent iam rolebinding create --kafka-cluster-id dzBCZ3qDS9Wa7aIwnDULPQ --principal User:restproxy --role ResourceOwner --resource Topic:_confluent-monitoring
       ```
 
+# Remove confluent packages
+  * Remove zookeeper
+  ```
+  ansible-playbook -vv -i hosts_provided_certs.yml remove_confluent.yml -l zookeeper --tags=zookeeper
+  ```
+
+  * Remove broker
+  ```
+  ansible-playbook -vv -i hosts_provided_certs.yml remove_confluent.yml -l kafka_broker --tags=kafka_broker
+  ```
+
 
 # Install tools on the broker node
 yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
