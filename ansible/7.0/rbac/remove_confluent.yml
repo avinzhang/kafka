@@ -59,6 +59,7 @@
     - /var/ssl/private
     - /var/log/kafka
     - /var/log/confluent
+    - /var/lib/zookeeper
     tags:
     - zookeeper
 
@@ -71,5 +72,6 @@
     - /var/ssl/private
     - /var/log/kafka
     - /var/log/confluent
+    - /var/lib/kafka
     tags:
     - kafka_broker
