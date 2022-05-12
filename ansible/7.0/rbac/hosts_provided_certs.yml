@@ -17,7 +17,13 @@ all:
 
     kafka_broker_service_environment_overrides:
       KAFKA_HEAP_OPTS: "-Xms2g -Xmx2g"
-    secrets_protection_enabled: false
+    
+    
+    secrets_protection_enabled: true
+    ssl_truststore_ca_cert_alias: caroot
+
+    required_total_memory_mb_zookeeper: 100
+    required_total_memory_mb_kafka_broker: 100
     rbac_enabled: true
     mds_super_user: mds
     mds_super_user_password: mds
