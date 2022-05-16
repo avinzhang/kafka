@@ -1,0 +1,13 @@
+---
+- hosts: aws_ec2
+  name: configuration play
+  become_user: root
+  become: true
+  remote_user: centos
+  gather_facts: false
+  tasks:
+  - name: Add IP address of all hosts to all hosts
+    copy:
+      dest: /etc/hosts
+      src: /tmp/myhosts_internal
+
