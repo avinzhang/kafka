@@ -9,9 +9,9 @@ MAINTAINER partner-support@confluent.io
 LABEL io.confluent.docker=true
 
 
-ARG CONFLUENT_VERSION=7.1.0
+ARG CONFLUENT_VERSION=7.1.1
 ARG CONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/7.1
-ARG CONFLUENT_PLATFORM_LABEL=7.1.0
+ARG CONFLUENT_PLATFORM_LABEL=7.1.1
 
 ENV COMPONENT=ksqldb-server
 ENV KSQL_CLASSPATH=/usr/share/java/${COMPONENT}/*
@@ -22,9 +22,9 @@ EXPOSE 8088
 
 USER root
 
-ADD --chown=appuser:appuser artifacts/* /usr/share/java/${COMPONENT}/
+ADD --chown=appuser:appuser /Users/avin/confluentinc/cpe/confluent-${CONFLUENT_VERSION}/share/* /usr/share/java/${COMPONENT}/
 #ADD --chown=appuser:appuser target/${ARTIFACT_ID}-${PROJECT_VERSION}-package/share/doc/* /usr/share/doc/${ARTIFACT_ID}/
-ADD --chown=appuser:appuser ksqldb-console-scripts-*/* /usr/bin/
+ADD --chown=appuser:appuser /Users/avin/confluentinc/kafka/src/ksql/ksqldb-console-scripts-*/* /usr/bin/
 ADD --chown=appuser:appuser ksqldb-etc-*/* /etc/ksqldb/
 
 COPY --chown=appuser:appuser ksqldb-etc-*/* /etc/confluent/docker/
