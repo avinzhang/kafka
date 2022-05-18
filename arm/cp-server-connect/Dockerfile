@@ -1,4 +1,4 @@
-FROM confluentinc/cp-server:latest.arm64
+FROM confluentinc/cp-server:7.1.1.arm64
 
 ARG COMMIT_ID=unknown
 LABEL io.confluent.docker.git.id=$COMMIT_ID
@@ -9,9 +9,9 @@ MAINTAINER partner-support@confluent.io
 LABEL io.confluent.docker=true
 
 
-ARG CONFLUENT_VERSION=7.1.0
+ARG CONFLUENT_VERSION=7.1.1
 ARG CONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/7.1
-ARG CONFLUENT_PLATFORM_LABEL=7.1.0
+ARG CONFLUENT_PLATFORM_LABEL=7.1.1
 
 # allow arg override of required env params
 ARG KAFKA_ZOOKEEPER_CONNECT

@@ -9,9 +9,9 @@ MAINTAINER partner-support@confluent.io
 LABEL io.confluent.docker=true
 
 
-ARG CONFLUENT_VERSION=7.1.0
+ARG CONFLUENT_VERSION=7.1.1
 ARG CONFLUENT_PACKAGES_REPO=https://packages.confluent.io/rpm/7.1
-ARG CONFLUENT_PLATFORM_LABEL=7.1.0
+ARG CONFLUENT_PLATFORM_LABEL=7.1.1
 
 ENV COMPONENT=kafka-rest
 
