@@ -6,3 +6,7 @@
 	path = ansible/7.0/cp-ansible
 	url = https://github.com/confluentinc/cp-ansible.git
   ignore = all
+[submodule "src/ksql"]
+	path = src/ksql
+	url = git@github.com:confluentinc/ksql.git
+  ignore = all
