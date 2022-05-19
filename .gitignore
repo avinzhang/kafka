@@ -12,3 +12,5 @@
 *.DS_Store
 jar/
 .terraform/
+artifacts
+ksqldb-console-scripts
