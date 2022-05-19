@@ -55,7 +55,7 @@ services:
       example.com: {}
 
   schemaregistry:
-    image: arm64/cp-schema-registry:$TAG
+    image: confluentinc/cp-schema-registry:$TAG
     hostname: schemaregistry
     container_name: schemaregistry
     restart: on-failure:3
@@ -74,7 +74,7 @@ services:
       example.com: {}
 
   ksqldb-server:
-    image: arm64/cp-ksqldb-server:$TAG
+    image: confluentinc/cp-ksqldb-server:$TAG
     hostname: ksqldb-server
     container_name: ksqldb-server
     restart: always

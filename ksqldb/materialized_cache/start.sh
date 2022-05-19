@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.0.arm64
+export TAG=7.1.1.arm64
 
 echo "----Download  connector-----------"
 mkdir -p ./jar/debezium
@@ -26,7 +26,6 @@ do
     fi
     sleep 5
 done
-exit
 docker compose exec mysql bash -c "mysql -uroot -proot <<EOF
 GRANT ALL PRIVILEGES ON *.* TO 'example-user' WITH GRANT OPTION;
 ALTER USER 'example-user'@'%' IDENTIFIED WITH mysql_native_password BY 'example-pw';
@@ -90,7 +89,7 @@ EOF;"
 echo
 echo
 echo "Query materialized views"
-sleep 3
+sleep 10
 docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 SELECT name, distinct_reasons, last_reason FROM support_view WHERE name = 'derek';
@@ -128,6 +127,7 @@ CREATE SOURCE CONNECTOR datagenpageviews WITH (
     'iterations' = '1000000000',
     'key.converter.schema.registry.url' = 'http://schemaregistry:8081',
     'value.converter.schema.registry.url' = 'http://schemaregistry:8081'
+);
 exit;
 EOF"
 
