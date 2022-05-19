@@ -10,3 +10,7 @@
 	path = src/ksql-images
 	url = git@github.com:confluentinc/ksql-images.git
   ignore = all
+[submodule "src/blueway"]
+	path = src/blueway
+	url = git@github.com:confluentinc/blueway.git
+  ignore = all
