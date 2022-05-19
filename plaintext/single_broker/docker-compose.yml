@@ -55,7 +55,7 @@ services:
       example.com: {}
 
   schemaregistry:
-    image: arm64/cp-schema-registry:$TAG
+    image: confluentinc/cp-schema-registry:$TAG
     hostname: schemaregistry
     container_name: schemaregistry
     restart: on-failure:3
@@ -74,7 +74,7 @@ services:
       example.com: {}
 
   connect:
-    image: arm64/cp-server-connect:$TAG
+    image: confluentinc/cp-server-connect:$TAG
     hostname: connect
     container_name: connect
     restart: always
@@ -104,7 +104,7 @@ services:
       example.com: {}
 
   ksqldb-server:
-    image: arm64/cp-ksqldb-server:$TAG
+    image: confluentinc/cp-ksqldb-server:$TAG
     hostname: ksqldb-server
     container_name: ksqldb-server
     restart: always
@@ -128,8 +128,20 @@ services:
     networks:
       example.com: {}
 
+  ksqldb-cli:
+    image: confluentinc/cp-ksqldb-cli:$TAG
+    hostname: ksqldb-cli
+    container_name: ksqldb-cli
+    restart: always
+    depends_on:
+      - ksqldb-server
+    entrypoint: /bin/sh
+    tty: true
+    networks:
+      example.com: {}
+
   restproxy:
-    image: arm64/cp-kafka-rest:$TAG
+    image: confluentinc/cp-kafka-rest:$TAG
     hostname: restproxy
     container_name: restproxy
     ports:
@@ -146,7 +158,7 @@ services:
       example.com: {}
 
   controlcenter:
-    image: arm64/cp-enterprise-control-center:$TAG
+    image: confluentinc/cp-enterprise-control-center:$TAG
     hostname: controlcenter
     container_name: controlcenter
     restart: always

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.0.arm64
+export TAG=7.1.1.arm64
 datagen_version=latest
 
 echo "----Download datagen connector-----------"
@@ -10,7 +10,7 @@ echo "Done"
 echo
 echo
 echo "----Start everything up with version $TAG------------"
-docker compose up -d --build --no-deps zookeeper kafka connect schemaregistry ksqldb-server restproxy controlcenter #&>/dev/null
+docker compose up -d --build --no-deps zookeeper kafka connect schemaregistry ksqldb-server ksqldb-cli restproxy controlcenter #&>/dev/null
 echo
 echo
 connect_ready=false
