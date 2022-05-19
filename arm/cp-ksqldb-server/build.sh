@@ -8,8 +8,7 @@ rsync -a /Users/avin/confluentinc/cpe/confluent-${VERSION}/share/java/ksqldb/ ar
 cd /Users/avin/confluentinc/kafka/src/ksql
 git checkout ${VERSION}-post
 
-rsync -a /Users/avin/confluentinc/kafka/src/ksql/bin/ ksqldb-console-scripts-${VERSION}/
+mkdir ksqldb-console-scripts
+rsync -a /Users/avin/confluentinc/kafka/src/ksql/bin/ ksqldb-console-scripts/
 
-cd "$(dirname "$(readlink -f "$0")")"
-touch test
 #docker build . -t confluentinc/cp-ksqldb-server:7.1.1.arm64
