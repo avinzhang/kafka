@@ -14,3 +14,59 @@
 	path = src/blueway
 	url = git@github.com:confluentinc/blueway.git
   ignore = all
+[submodule "src/ce-kafka"]
+	path = src/ce-kafka
+	url = git@github.com:confluentinc/ce-kafka.git
+  ignore = all
+[submodule "src/cli"]
+	path = src/cli
+	url = git@github.com:confluentinc/cli.git
+  ignore = all
+[submodule "CFK/confluent-kubernetes-examples"]
+	path = CFK/confluent-kubernetes-examples
+	url = git@github.com:confluentinc/confluent-kubernetes-examples.git
+  ignore = all
+[submodule "src/confluent-security-plugins"]
+	path = src/confluent-security-plugins
+	url = git@github.com:confluentinc/confluent-security-plugins.git
+  ignore = all
+[submodule "src/cp-all-in-one"]
+	path = src/cp-all-in-one
+	url = git@github.com:confluentinc/cp-all-in-one.git
+  ignore = all
+[submodule "src/cp-demo"]
+	path = src/cp-demo
+	url = git@github.com:confluentinc/cp-demo.git
+  ignore = all
+[submodule "src/demo-scene"]
+	path = src/demo-scene
+	url = git@github.com:confluentinc/demo-scene.git
+  ignore = all
+[submodule "src/examples"]
+	path = src/examples
+	url = git@github.com:confluentinc/examples.git
+  ignore = all
+[submodule "src/jmx-monitoring-stacks"]
+	path = src/jmx-monitoring-stacks
+	url = git@github.com:confluentinc/jmx-monitoring-stacks.git
+  ignore = all
+[submodule "src/metadata-service"]
+	path = src/metadata-service
+	url = git@github.com:confluentinc/metadata-service.git
+  ignore = all
+[submodule "src/schema-registry"]
+	path = src/schema-registry
+	url = git@github.com:confluentinc/schema-registry.git
+  ignore = all
+[submodule "src/rest-utils"]
+	path = src/rest-utils
+	url = git@github.com:confluentinc/rest-utils.git
+  ignore = all
+[submodule "src/kafka-connect-object-store-source"]
+	path = src/kafka-connect-object-store-source
+	url = git@github.com:confluentinc/kafka-connect-object-store-source.git
+  ignore = all
+[submodule "src/kafka-connect-storage-cloud"]
+	path = src/kafka-connect-storage-cloud
+	url = git@github.com:confluentinc/kafka-connect-storage-cloud.git
+  ignore = all
