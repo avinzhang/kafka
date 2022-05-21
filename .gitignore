@@ -14,3 +14,4 @@ jar/
 .terraform/
 artifacts
 ksqldb-console-scripts
+confluent-hub-components
