@@ -112,7 +112,7 @@ services:
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
     volumes:
-      - ./jar:/usr/share/kafka/plugins/jar
+      - ./confluent-hub-components:/usr/share/kafka/plugins/confluent-hub-components
     networks:
       example.com: {}
 

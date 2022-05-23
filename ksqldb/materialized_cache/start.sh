@@ -3,9 +3,9 @@
 export TAG=7.1.1.arm64
 
 echo "----Download  connector-----------"
-mkdir -p ./jar/debezium
-ls jar/debezium-debezium-connector-mysql/lib/debezium-connector-mysql-*.jar || confluent-hub install  --component-dir ./jar debezium/debezium-connector-mysql:1.1.0
-ls ./jar/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar confluentinc/kafka-connect-datagen:latest --no-prompt
+mkdir -p ./confluent-hub-components
+ls confluent-hub-components/debezium-debezium-connector-mysql/lib/debezium-connector-mysql-*.jar || confluent-hub install  --component-dir ./confluent-hub-components debezium/debezium-connector-mysql:1.9.2 --no-prompt
+ls ./confluent-hub-components/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./confluent-hub-components confluentinc/kafka-connect-datagen:latest --no-prompt
 echo "Done"
 echo
 echo
@@ -31,7 +31,9 @@ GRANT ALL PRIVILEGES ON *.* TO 'example-user' WITH GRANT OPTION;
 ALTER USER 'example-user'@'%' IDENTIFIED WITH mysql_native_password BY 'example-pw';
 FLUSH PRIVILEGES;
 EOF"
-
+echo
+echo
+echo
 echo "----Create connector in ksqldb----------------"
 docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
@@ -128,6 +130,13 @@ CREATE SOURCE CONNECTOR datagenpageviews WITH (
     'key.converter.schema.registry.url' = 'http://schemaregistry:8081',
     'value.converter.schema.registry.url' = 'http://schemaregistry:8081'
 );
+
+CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', VALUE_FORMAT='AVRO');
+CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
+CREATE STREAM pageviews_female with (KAFKA_TOPIC='pageviews_female') AS SELECT users.userid AS userid, pageid, regionid, gender FROM pageviews LEFT JOIN users ON pageviews.userid = users.userid WHERE gender = 'FEMALE';
+CREATE STREAM pageviews_female_like_89 WITH (kafka_topic='pageviews_enriched_r8_r9', value_format='AVRO') AS SELECT * FROM pageviews_female WHERE regionid LIKE '%_8' OR regionid LIKE '%_9';
+CREATE TABLE pageviews_regions WITH (kafka_topic='pageviews_regions', value_format='AVRO', KEY_FORMAT='avro') AS SELECT gender, regionid , COUNT(*) AS numusers FROM pageviews_female WINDOW TUMBLING (size 30 second) GROUP BY gender, regionid HAVING COUNT(*) > 1;
+
 exit;
 EOF"
 
