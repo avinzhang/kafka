@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.0.1
+export TAG=7.1.1.arm64
 
 echo
 echo "----------Start zookeeper and broker -------------"
