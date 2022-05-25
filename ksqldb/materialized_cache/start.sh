@@ -10,14 +10,14 @@ echo "Done"
 echo
 echo
 echo "----Start everything up with version $TAG------------"
-docker compose up -d --build --no-deps zookeeper kafka schemaregistry ksqldb-server mysql #&>/dev/null
+docker-compose up -d --build --no-deps zookeeper kafka schemaregistry ksqldb-server mysql #&>/dev/null
 echo
 
 echo
 ksql_ready=false
 while [ $ksql_ready == false ]
 do
-    docker compose logs ksqldb-server|grep "Server up and running" &> /dev/null
+    docker-compose logs ksqldb-server|grep "Server up and running" &> /dev/null
     if [ $? -eq 0 ]; then
       ksql_ready=true
       echo "*** ksqldb is ready ****"
@@ -26,7 +26,7 @@ do
     fi
     sleep 5
 done
-docker compose exec mysql bash -c "mysql -uroot -proot <<EOF
+docker-compose exec mysql bash -c "mysql -uroot -proot <<EOF
 GRANT ALL PRIVILEGES ON *.* TO 'example-user' WITH GRANT OPTION;
 ALTER USER 'example-user'@'%' IDENTIFIED WITH mysql_native_password BY 'example-pw';
 FLUSH PRIVILEGES;
@@ -35,7 +35,7 @@ echo
 echo
 echo
 echo "----Create connector in ksqldb----------------"
-docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 CREATE SOURCE CONNECTOR calls_reader WITH (
     'connector.class' = 'io.debezium.connector.mysql.MySqlConnector',
@@ -59,7 +59,7 @@ sleep 5
 echo 
 echo 
 echo "Create materialized views"
-docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 SHOW TOPICS;
 
@@ -92,7 +92,7 @@ echo
 echo
 echo "Query materialized views"
 sleep 10
-docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 SELECT name, distinct_reasons, last_reason FROM support_view WHERE name = 'derek';
 
@@ -105,7 +105,7 @@ EOF"
 
 echo 
 echo "---Create datagen connector"
-docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 CREATE SOURCE CONNECTOR datagenusers WITH (
     'connector.class' = 'io.confluent.kafka.connect.datagen.DatagenConnector',
@@ -130,7 +130,10 @@ CREATE SOURCE CONNECTOR datagenpageviews WITH (
     'key.converter.schema.registry.url' = 'http://schemaregistry:8081',
     'value.converter.schema.registry.url' = 'http://schemaregistry:8081'
 );
+EOF"
+sleep 5
 
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', VALUE_FORMAT='AVRO');
 CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
 CREATE STREAM pageviews_female with (KAFKA_TOPIC='pageviews_female') AS SELECT users.userid AS userid, pageid, regionid, gender FROM pageviews LEFT JOIN users ON pageviews.userid = users.userid WHERE gender = 'FEMALE';
