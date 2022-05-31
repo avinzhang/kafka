@@ -4,14 +4,14 @@ export TAG=7.1.1.arm64
 
 echo
 echo "----Start everything up with version $TAG------------"
-docker compose up -d --build --no-deps zookeeper kafka schemaregistry ksqldb-server #&>/dev/null
+docker-compose up -d --build --no-deps zookeeper kafka schemaregistry ksqldb-server #&>/dev/null
 echo
 
 echo
 ksql_ready=false
 while [ $ksql_ready == false ]
 do
-    docker compose logs ksqldb-server|grep "Server up and running" &> /dev/null
+    docker-compose logs ksqldb-server|grep "Server up and running" &> /dev/null
     if [ $? -eq 0 ]; then
       ksql_ready=true
       echo "*** ksqldb is ready ****"
@@ -23,7 +23,8 @@ done
 echo
 echo
 echo 
-docker compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
+exit
+docker-compose exec ksqldb-server bash -c "ksql http://ksqldb-server:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 CREATE STREAM transactions (
     tx_id VARCHAR KEY,
