@@ -39,10 +39,67 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
       ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
       ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/zookeeper1.truststore.jks
       ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: confluent
       ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/zookeeper1.keystore.jks
+      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: confluent
+      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+    volumes:
+    - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+  zookeeper2:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper2
+    container_name: zookeeper2
+    ports:
+      - "2181:2181"
+      - "2182:2182"
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SECURE_CLIENT_PORT: 2182
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
+      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/zookeeper2.truststore.jks
+      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: confluent
+      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/zookeeper2.keystore.jks
+      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: confluent
+      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+      KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+    volumes:
+    - ./secrets:/etc/kafka/secrets
+    networks:
+      example.com: {}
+
+  zookeeper3:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper3
+    container_name: zookeeper3
+    ports:
+      - "3181:3181"
+      - "3182:3182"
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 3181
+      ZOOKEEPER_SECURE_CLIENT_PORT: 3182
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
+      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/zookeeper3.truststore.jks
+      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: confluent
+      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/zookeeper3.keystore.jks
       ZOOKEEPER_SSL_KEYSTORE_PASSWORD: confluent
       ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
       KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
@@ -66,7 +123,7 @@ services:
       - 1095:1095
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2182,zookeeper3:3182"
       KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
       KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
       KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka1.truststore.jks
@@ -219,7 +276,7 @@ services:
       - 2095:2095
     environment:
       KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2182,zookeeper3:3182"
       KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
       KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
       KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka1.truststore.jks
@@ -370,7 +427,7 @@ services:
       - 3095:3095
     environment:
       KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2182,zookeeper3:3182"
       KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
       KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
       KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka1.truststore.jks
@@ -834,9 +891,11 @@ services:
 
       CONTROL_CENTER_CONNECT_CONNECT-CLUSTER_CLUSTER: https://connect:8083
       CONTROL_CENTER_KSQL_KSQLCLUSTER_URL: https://ksqldb-server:8088
-      CONTROL_CENTER_SCHEMA_REGISTRY_SR1_URL: https://schemaregistry:8081
-      CONTROL_CENTER_SCHEMA_REGISTRY_SR1_SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/controlcenter.truststore.jks
-      CONTROL_CENTER_SCHEMA_REGISTRY_SR1_SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: confluent
+      CONTROL_CENTER_KSQL_KSQLCLUSTER_ADVERTISED_URL: https://ksqldb-server:8088
+
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: https://schemaregistry:8081
+      CONTROL_CENTER_SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/controlcenter.truststore.jks
+      CONTROL_CENTER_SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: confluent
 
       # Used by Control Center to connect to the Admin API for Self Balancing Clusters
       CONTROL_CENTER_STREAMS_CPREST_URL: https://kafka1:1090,https://kafka2:2090,https://kafka3:3090

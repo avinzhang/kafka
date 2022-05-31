@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.0.1
+export TAG=7.1.1.arm64
 
 echo "----------Start Openldap---------"
 docker-compose up -d --build --no-deps openldap
@@ -19,7 +19,7 @@ done
 echo
 echo
 echo "----------Start zookeeper and broker -------------"
-docker-compose up -d --build --no-deps zookeeper1 kafka1 kafka2 kafka3
+docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3
 echo "Done"
 echo
 echo
@@ -374,3 +374,13 @@ echo "   * Permission for schema registry"
 confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3users --role ClusterAdmin --schema-registry-cluster-id schema-registry
 echo "   * Permission for ksqldb"
 confluent iam rbac role-binding create --kafka-cluster-id $KAFKA_CLUSTER_ID --principal User:c3users --role ClusterAdmin --ksql-cluster-id $KSQLDB_CLUSTER_ID
+
+# role binding for c3User to run ksqldb select queries
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Topic:users --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Subject:users --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Topic:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --prefix
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Subject:pageviews --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry --prefix
+
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Topic:_confluent-ksql-${KSQLDB_CLUSTER_ID}transient --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Subject:_confluent-ksql-${KSQLDB_CLUSTER_ID}transient --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry
+confluent iam rbac role-binding create --principal User:c3User --role ResourceOwner --resource Group:_confluent-ksql-${KSQLDB_CLUSTER_ID} --prefix --kafka-cluster-id $KAFKA_CLUSTER_ID

@@ -8,10 +8,11 @@
 # Cleanup files
 rm -f *.crt *.csr *_creds *.jks *.srl *.key *.pem *.der *.p12
 
+cp ../dhparam.pem .
 # Generate CA key
 openssl req -new -x509 -keyout ca.key -out ca.crt -days 365 -subj '/CN=ca.example.com/O=EXAMPLE/L=MountainView/S=Ca/C=US' -passin pass:confluent -passout pass:confluent
 
-for i in zookeeper1 kafka1 schemaregistry restproxy connect ksqldb-server controlcenter openldap user1
+for i in zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3 schemaregistry restproxy connect ksqldb-server controlcenter openldap user1
 do
 	echo "------------------------------- $i -------------------------------"
 
