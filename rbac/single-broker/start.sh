@@ -333,7 +333,6 @@ docker-compose exec ksqldb-server bash -c "cat << EOF > /tmp/client.properties
 ssl.truststore.location=/etc/kafka/secrets/ksqldb-server.truststore.jks
 ssl.truststore.password=confluent
 EOF"
-exit
 echo "Start ksql streams and queries"
 docker-compose exec ksqldb-server bash -c "ksql --config-file /tmp/client.properties -u ksqldbUser -p ksqldbUser https://localhost:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
