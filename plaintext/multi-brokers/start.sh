@@ -1,11 +1,12 @@
 #!/bin/bash
 
-export TAG=7.1.0.arm64
+export TAG=7.1.1.arm64
 
 echo "----------Start zookeeper and broker -------------"
-docker compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3 schemaregistry
+docker compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
 echo "Done"
 echo
+docker compose up -d --build --no-deps kafka1 kafka2 kafka3 schemaregistry
 echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
@@ -19,7 +20,6 @@ do
     fi
     sleep 5
 done
-exit
 echo
 echo ">> Download datagen connector"
 mkdir -p ./jar/datagen

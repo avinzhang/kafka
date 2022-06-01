@@ -8,6 +8,7 @@ services:
     container_name: zookeeper1
     ports:
       - "1181:1181"
+      - "1999:1999"
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 1181
@@ -15,7 +16,12 @@ services:
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      KAFKA_JMX_PORT: 1999
+      KAFKA_JMX_HOSTNAME: localhost
       KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+        -Dcom.sun.management.jmxremote=true
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
     networks:
       example.com: {}
 
@@ -26,6 +32,7 @@ services:
     container_name: zookeeper2
     ports:
       - "2181:2181"
+      - "2999:2999"
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -33,7 +40,12 @@ services:
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      KAFKA_JMX_PORT: 2999
+      KAFKA_JMX_HOSTNAME: localhost
       KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+        -Dcom.sun.management.jmxremote=true
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
     networks:
       example.com: {}
 
@@ -45,6 +57,7 @@ services:
     container_name: zookeeper3
     ports:
       - "3181:3181"
+      - "3999:3999"
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 3181
@@ -52,7 +65,12 @@ services:
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_SERVERS: "zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888"
+      KAFKA_JMX_PORT: 3999
+      KAFKA_JMX_HOSTNAME: localhost
       KAFKA_OPTS: -Dzookeeper.4lw.commands.whitelist=*
+        -Dcom.sun.management.jmxremote=true
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
     networks:
       example.com: {}
 
