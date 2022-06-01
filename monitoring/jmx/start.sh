@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=6.1.1
+export TAG=7.1.1.arm64
 echo
 echo "----Start everything up with version $TAG------------"
 docker-compose up -d --build --no-deps zookeeper kafka &>/dev/null
@@ -25,3 +25,6 @@ done
 
 
 java -jar cmdline-jmxclient-0.10.3.jar admin:admin localhost:9991 kafka.network:name=RequestQueueTimeMs,request=ReplicaStatus,type=RequestMetrics
+
+# Using JmxTool
+kafka-run-class kafka.tools.JmxTool --object-name kafka.network:name=RequestQueueTimeMs,request=ReplicaStatus,type=RequestMetrics --jmx-url service:jmx:rmi://localhost/jndi/rmi://localhost:9991/jmxrmi --jmx-auth-prop admin=admin --one-time true
