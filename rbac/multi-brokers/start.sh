@@ -2,6 +2,10 @@
 
 export TAG=7.1.1.arm64
 
+echo "----------Start zookeeper" 
+docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
+echo
+echo
 echo "----------Start Openldap---------"
 docker-compose up -d --build --no-deps openldap
 STARTED=false
@@ -18,8 +22,8 @@ do
 done
 echo
 echo
-echo "----------Start zookeeper and broker -------------"
-docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3
+echo "-----------Start brokers"
+docker-compose up -d --build --no-deps kafka1 kafka2 kafka3
 echo "Done"
 echo
 echo
@@ -35,7 +39,6 @@ do
     fi
     sleep 5
 done
-
 echo
 OUTPUT=$(
   expect <<END
