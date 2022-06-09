@@ -1,0 +1,29 @@
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+
+rule_files:
+  - 'alert.rules'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+
+  - job_name: Confluent Cloud
+    scrape_interval: 1m
+    scrape_timeout: 1m
+    honor_timestamps: true
+    static_configs:
+      - targets:
+        - api.telemetry.confluent.cloud
+    scheme: https
+    basic_auth:
+      username: BJXQWWQIVOQ6GHKS
+      password: DZcYnGGiB1c/MwG44QZXz45o8tyK1toUjB6lQocifaW/BE+HczTmKegBq5ChR2aT
+    metrics_path: /v2/metrics/cloud/export
+    params:
+      resource.kafka.id: [lkc-2251g2]
+      resource.connector.id: []
+      resource.ksql.id: []
+      resource.schema_registry.id: []
