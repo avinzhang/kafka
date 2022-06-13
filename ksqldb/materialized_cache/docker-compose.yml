@@ -111,6 +111,7 @@ services:
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
+      KSQL_LOG4J_LOGGERS: org.reflections=ERROR
     volumes:
       - ./confluent-hub-components:/usr/share/kafka/plugins/confluent-hub-components
     networks:
@@ -155,6 +156,49 @@ services:
     volumes:
       - "./mysql/custom-config.cnf:/etc/mysql/conf.d/custom-config.cnf"
       - ./mysql:/docker-entrypoint-initdb.d
+    networks:
+      example.com: {}
+
+  postgres:
+    image: postgres:12
+    hostname: postgres
+    container_name: postgres
+    ports:
+     - "5432:5432"
+    environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
+    volumes:
+     - ./postgres:/docker-entrypoint-initdb.d
+    networks:
+      example.com: {}
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+    container_name: elasticsearch
+    hostname: elasticsearch
+    ports:
+      - 9200:9200
+    environment:
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: "trial"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      discovery.type: "single-node"
+    networks:
+      example.com: {}
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.2
+    container_name: kibana
+    hostname: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    environment:
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: "trial"
+      discovery.type: "single-node"
     networks:
       example.com: {}
 
