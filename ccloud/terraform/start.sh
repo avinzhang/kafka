@@ -1,7 +1,14 @@
 #! /bin/bash
 
+echo ">>Create SA"
+confluent iam service-account create avin_oa_sa --description "avin's orgadmin sa" -ojson >/tmp/cloud_oa_sa
+export SA_ID="`cat /tmp/cloud_oa_sa | jq -r .id`"
+echo
 echo ">>Create Cloud admin api key"
-#confluent api-key create --resource "cloud" -ojson > /tmp/cloud_api_key
+confluent api-key create --service-account $SA_ID --resource "cloud" -ojson > /tmp/cloud_api_key
+echo
+echo ">>Assign OrganizationAdmin role to SA"
+confluent iam rbac role-binding create --principal User:$SA_ID --role OrganizationAdmin
 echo
 echo ">>Export api key as environment variables"
 export CONFLUENT_CLOUD_API_KEY="`cat /tmp/cloud_api_key | jq -r .key`"
