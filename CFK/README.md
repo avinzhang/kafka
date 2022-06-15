@@ -15,7 +15,7 @@
     * Create cluster with eksctl, the provisioning process will take a while
     ```
      eksctl create cluster \
-     --version 1.19 \
+     --version 1.20 \
      --name avin-eks \
      --region ap-southeast-2 \
      --nodegroup-name eks-ng \
@@ -27,6 +27,7 @@
      --ssh-public-key ~/.ssh/id_rsa.pub \
      --managed \
      --node-private-networking \
+     --zones ap-southeast-2a,ap-southeast-2b,ap-southeast-2c \
      --verbose 3
     ```
     * Delete the cluster
