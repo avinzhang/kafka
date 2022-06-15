@@ -110,15 +110,7 @@
   kubectl config delete-context xxxx
   ```
 # Rename context
-  * Rename cluster name
-  ```
-  kubectl config set-context <name> --cluster='xxxx'
-  ```
-  * Rename authinfo
-  ```
-  kubectl config set-context <name> --user='xxxx'
-  ```
-  * Rename name
+  * Rename context name
   ```
   kubectl config rename-context oldname newname
   ```
