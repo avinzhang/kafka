@@ -105,11 +105,11 @@ echo ">> Set cloud environment"
 confluent environment use `confluent environment list -ojson | jq -r '.[]|select(.name == "avin").id'`
 echo
 echo ">> Set cloud cluster ID "
-confluent kafka cluster use `terraform -chdir=./cloud output -json | jq -r '."cloud-cluster-id"."value"'`
+confluent kafka cluster use `terraform -chdir=../cloud output -json | jq -r '."cloud-cluster-id"."value"'`
 echo
 echo ">> Get cluster link api key"
-export CL_API_KEY=`terraform -chdir=./cloud output -json | jq -r '."cluster-link-api-key"."value"'`
-export CL_API_SECRET=`terraform -chdir=./cloud output -json | jq -r '."cluster-link-api-secret"."value"'`
+export CL_API_KEY=`terraform -chdir=../cloud output -json | jq -r '."cluster-link-api-key"."value"'`
+export CL_API_SECRET=`terraform -chdir=../cloud output -json | jq -r '."cluster-link-api-secret"."value"'`
 
 echo ">> Create config file for cluster link on cloud cluster"
 cat << EOF > /tmp/cluterlink-dst.config
@@ -120,7 +120,7 @@ auto.create.mirror.topics.filters={ "topicFilters": [ {"name": "user",  "pattern
 EOF
 
 echo 
-export CLOUD_CLUSTER_ID=`terraform -chdir=./cloud output -json | jq -r '."cloud-cluster-id"."value"'`
+export CLOUD_CLUSTER_ID=`terraform -chdir=../cloud output -json | jq -r '."cloud-cluster-id"."value"'`
 export CP_CLUSTER_ID=`curl -s  http://localhost:1090/v1/metadata/id  | grep id |jq -r ".id"`
 
 echo "Create cluster link on Cloud cluster"

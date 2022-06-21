@@ -2,6 +2,13 @@ output "cloud-cluster-id" {
   value = "${confluent_kafka_cluster_v2.dedicated.id}"
 }
 
+output "cloud-cluster-rest" {
+  value = "${confluent_kafka_cluster_v2.dedicated.rest_endpoint}"
+}
+output "cloud-cluster-endpoint" {
+  value = "${confluent_kafka_cluster_v2.dedicated.bootstrap_endpoint}"
+}
+
 output "cluster-link-api-key" {
   value = "${confluent_api_key_v2.cluster-link-api-key.id}"
 }
@@ -10,6 +17,8 @@ output "cluster-link-api-secret" {
   value = "${confluent_api_key_v2.cluster-link-api-key.secret}"
   sensitive = true
 }
+
+
 
 output "resource-ids" {
   value = <<-EOT
