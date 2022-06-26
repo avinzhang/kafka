@@ -27,3 +27,16 @@
       dest: /etc/hosts
       src: /tmp/myhosts_internal
 
+- hosts: ec2hosts
+  name: Install additional packages
+  become_user: root
+  remote_user: centos
+  become: true
+  gather_facts: true
+  tasks:
+  - name: Install packages
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - telnet
