@@ -65,14 +65,10 @@ aws_security_groups:
     - 389
     - 636
     cidr_ip: 10.10.0.0/16
-  - proto: tcp
-    ports:
-    - 9021
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    ports:
-    - 8200
-    cidr_ip: 0.0.0.0/0
+  #- proto: tcp
+  #  ports:
+  #  - 9021
+  #  cidr_ip: 0.0.0.0/0
   rules_egress:
   - proto: all
     cidr_ip: 0.0.0.0/0
@@ -81,7 +77,7 @@ aws_security_groups:
 aws_ec2_instances:
 - tag_name: master-avin
   tag_environment: "{{ aws_environment }}"
-  instance_type: t2.medium
+  instance_type: t2.large
   security_group: avin-sg
   region: "{{ aws_region }}"
   volume_size: 10
@@ -90,11 +86,11 @@ aws_ec2_instances:
   sshkey_name: "{{ aws_keypair_name }}"
 - tag_name: nodes-avin
   tag_environment: "{{ aws_environment }}"
-  instance_type: t2.medium
+  instance_type: t2.large
   security_group: avin-sg
   region: "{{ aws_region }}"
   volume_size: 10
-  exact_count: 8
+  exact_count: 7
   delete_vol_on_termination: yes
   sshkey_name: "{{ aws_keypair_name }}"
 
