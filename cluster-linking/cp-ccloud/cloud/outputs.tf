@@ -18,6 +18,9 @@ output "cluster-link-api-secret" {
   sensitive = true
 }
 
+output "cluster-link-sa" {
+  value = "${confluent_service_account_v2.cluster-link.id}"
+}
 
 
 output "resource-ids" {
