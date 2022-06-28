@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.1.arm64
+export TAG=7.1.2.arm64
 
 echo "----------Start zookeeper and broker -------------"
 docker compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
