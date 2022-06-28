@@ -1,8 +1,8 @@
 confluent login --save
 
 echo ">>Export api key as environment variables"
-export TF_VAR_confluent_cloud_api_key=`cat /tmp/cloud_api_key | jq -r .key`
-export TF_VAR_confluent_cloud_api_secret=`cat /tmp/cloud_api_key | jq -r .secret`
+export TF_VAR_confluent_cloud_api_key=`cat ./cloud_api_key | jq -r .key`
+export TF_VAR_confluent_cloud_api_secret=`cat ./cloud_api_key | jq -r .secret`
 terraform destroy --auto-approve
 
 echo ">> Delete SA"
@@ -21,4 +21,4 @@ done
 
 
 
-rm terraform.tfstate* tfplan prometheus/prometheus.yml
+rm terraform.tfstate* cloud_api_key cloud_OrgAdmin_sa tfplan prometheus/prometheus.yml 
