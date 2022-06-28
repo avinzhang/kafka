@@ -88,7 +88,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2181,zookeeper3:3181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka1:1092,PLAINTEXT://kafka1:1093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:1092,PLAINTEXT://kafka1:1093
       CONFLUENT_METRICS_ENABLE: 'false'
       KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
       KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
@@ -125,7 +125,7 @@ services:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2181,zookeeper3:3181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka2:2092,PLAINTEXT://kafka2:2093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:2092,PLAINTEXT://kafka2:2093
       CONFLUENT_METRICS_ENABLE: 'false'
       KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
       KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
@@ -162,7 +162,7 @@ services:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1182,zookeeper2:2181,zookeeper3:3181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka3:3092,PLAINTEXT://kafka3:3093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:3092,PLAINTEXT://kafka3:3093
       CONFLUENT_METRICS_ENABLE: 'false'
       KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
       KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
@@ -186,7 +186,7 @@ services:
       example.com: {}
 
   schemaregistry:
-    image: arm64/cp-schema-registry:$TAG
+    image: confluentinc/cp-schema-registry:$TAG
     hostname: schemaregistry
     container_name: schemaregistry
     restart: on-failure:3
@@ -208,7 +208,7 @@ services:
       example.com: {}
 
   connect:
-    image: arm64/cp-server-connect:$TAG
+    image: confluentinc/cp-server-connect:$TAG
     hostname: connect
     container_name: connect
     restart: always
@@ -246,7 +246,7 @@ services:
       example.com: {}
 
   ksqldb-server:
-    image: arm64/cp-ksqldb-server:$TAG
+    image: confluentin/cp-ksqldb-server:$TAG
     hostname: ksqldb-server
     container_name: ksqldb-server
     restart: always
@@ -278,7 +278,7 @@ services:
       example.com: {}
 
   controlcenter:
-    image: arm64/cp-enterprise-control-center:$TAG
+    image: confluentin/cp-enterprise-control-center:$TAG
     hostname: controlcenter
     container_name: controlcenter
     restart: always
