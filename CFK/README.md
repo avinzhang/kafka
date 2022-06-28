@@ -129,4 +129,8 @@
   helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes --version="0.304.2"
   ```
 
-
+# Useful commands
+  * Get nodes with region and zones
+  ```
+  kubectl get node --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
+  ```
