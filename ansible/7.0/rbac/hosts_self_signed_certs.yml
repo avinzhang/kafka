@@ -6,8 +6,10 @@ all:
     ansible_become: true
     ansible_ssh_private_key_file: ~/.ssh/id_rsa
 
+    confluent_cli_archive_file_source: https://s3-us-west-2.amazonaws.com/confluent.cloud/confluent-cli/archives/latest/confluent_latest_linux_amd64.tar.gz
+
     ssl_enabled: true
-    ssl_mutual_auth_enabled: true
+    ssl_mutual_auth_enabled: false
     regenerate_ca: false
     regenerate_keystore_and_truststore: false
 
@@ -29,14 +31,20 @@ all:
     kafka_rest_ldap_password: restproxy
     control_center_ldap_user: controlcenter
     control_center_ldap_password: controlcenter
-    token_services_public_pem_file: ../rbac/mds_keys/public.pem
-    token_services_private_pem_file: ../rbac/mds_keys/keypair.pem
-    kafka_broker_principal:
-      - superUser
+    create_mds_certs: false
+    token_services_public_pem_file: '{{inventory_dir}}/mds_keys/public.pem'
+    token_services_private_pem_file: '{{inventory_dir}}/mds_keys/keypair.pem'
+
+    kafka_broker_custom_properties:
+      confluent.cluster.link.enable: "true"
+      password.encoder.secret: secret
+
     kafka_broker_custom_listeners:
       client:
         name: CLIENT
         port: 9095
+        ssl_enabled: false
+        sasl_protocol: plain
 
 zookeeper:
   vars:
