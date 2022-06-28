@@ -257,7 +257,7 @@ export CLOUD_ENV=`confluent environment list -ojson | jq -r '.[]|select(.name ==
 confluent environment use $CLOUD_ENV
 echo
 echo ">> Set cloud cluster ID "
-confluent kafka cluster use `terraform -chdir=./cloud output -json | jq -r '."cloud-cluster-id"."value"'`
+confluent kafka cluster use `terraform -chdir=../cloud output -json | jq -r '."cloud-cluster-id"."value"'`
 echo
 echo ">> Get cluster link api key"
 export CL_API_KEY=`terraform -chdir=../cloud output -json | jq -r '."cluster-link-api-key"."value"'`
