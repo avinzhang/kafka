@@ -12,6 +12,7 @@
 *.DS_Store
 jar/
 .terraform/
+.terraform.lock.hcl
 artifacts
 ksqldb-console-scripts
 confluent-hub-components
