@@ -6,7 +6,10 @@ all:
     ansible_become: true
     ansible_ssh_private_key_file: ~/.ssh/id_rsa
 
+    confluent_cli_archive_file_source: https://s3-us-west-2.amazonaws.com/confluent.cloud/confluent-cli/archives/latest/confluent_latest_linux_amd64.tar.gz
+
     ssl_enabled: true
+    ssl_mutual_auth_enabled: false
     ssl_provided_keystore_and_truststore: true
     ssl_keystore_filepath: '{{inventory_dir}}/../../certs/{{inventory_hostname}}.keystore.jks'
     ssl_keystore_key_password: confluent
@@ -19,8 +22,8 @@ all:
       KAFKA_HEAP_OPTS: "-Xms2g -Xmx2g"
     
     
-    secrets_protection_enabled: true
-    ssl_truststore_ca_cert_alias: caroot
+   #secrets_protection_enabled: true
+   # ssl_truststore_ca_cert_alias: caroot
 
     required_total_memory_mb_zookeeper: 100
     required_total_memory_mb_kafka_broker: 100
@@ -39,14 +42,19 @@ all:
     kafka_rest_ldap_password: restproxy
     control_center_ldap_user: c3Admin
     control_center_ldap_password: c3Admin
+    create_mds_certs: false
     token_services_public_pem_file: '{{inventory_dir}}/mds_keys/public.pem'
     token_services_private_pem_file: '{{inventory_dir}}/mds_keys/keypair.pem'
-    kafka_broker_principal:
-      - kafka
+
+    kafka_broker_custom_properties:
+      confluent.cluster.link.enable: "true"
+      password.encoder.secret: secret
     kafka_broker_custom_listeners:
       client:
         name: CLIENT
         port: 9095
+        ssl_enabled: false
+        sasl_protocol: plain
 
 zookeeper:
   vars:
@@ -66,6 +74,7 @@ kafka_broker:
       ldap.java.naming.provider.url: ldaps://openldap.example.com:636
       ldap.java.naming.security.protocol: SSL
       ldap.ssl.truststore.location: "/var/ssl/private/kafka_broker.truststore.jks"
+      ldap.ssl.truststore.password: confluent
       ldap.java.naming.security.principal: cn=admin,DC=example,DC=com
       ldap.java.naming.security.credentials: admin
       ldap.java.naming.security.authentication: simple
@@ -78,12 +87,13 @@ kafka_broker:
       ldap.group.member.attribute: member
       ldap.group.search.base: ou=groups,dc=example,dc=com
       ldap.group.object.class: groupOfNames
+
+      confluent.balancer.enable: "true"
+      confluent.balancer.heal.uneven.load.trigger: "ANY_UNEVEN_LOAD"
+      confluent.balancer.heal.broker.failure.threshold.ms: 300000
+      confluent.balancer.throttle.bytes.per.second: 10485760
   hosts:
     kafka1.example.com:
     kafka2.example.com:
     kafka3.example.com:
-
-schema_registry:
-  hosts:
-    schemaregistry.example.com:
 
