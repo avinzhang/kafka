@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-export TAG=7.1.0
+export TAG=7.0.1
 export INIT_TAG=2.3.0
 echo "Starting up Confluent for Kubernetes"
 echo
@@ -21,11 +21,17 @@ echo "---------------------------------------"
 echo
 echo
 echo "Install confluent for kubernetes"
-helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+#helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes --version="0.435.11"
 echo
 echo
 echo "Install Confluent Platform components"
-envsubst < ./plaintext-2.2.0.yaml | kubectl apply -f -
+envsubst < ./zookeeper.yaml | kubectl apply -f -
+envsubst < ./kafka.yaml | kubectl apply -f -
+envsubst < ./connect.yaml | kubectl apply -f -
+envsubst < ./schemaregistry.yaml | kubectl apply -f -
+envsubst < ./ksqldb.yaml | kubectl apply -f -
+envsubst < ./controlcenter.yaml | kubectl apply -f -
 sleep 10
 echo 
 echo 
