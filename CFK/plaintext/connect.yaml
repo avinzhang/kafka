@@ -1,0 +1,29 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 1
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+  image:
+    application: confluentinc/cp-server-connect:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: latest
+      storageLimit: 1G
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
