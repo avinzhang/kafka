@@ -67,7 +67,7 @@ echo ">>>Setup config file for token port"
 docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/client-rbac.properties
 sasl.mechanism=OAUTHBEARER
 security.protocol=SASL_SSL
-ssl.truststore.location=/etc/kafka/secrets/client.truststore.jks
+ssl.truststore.location=/etc/kafka/secrets/user1.truststore.jks
 ssl.truststore.password=confluent
 sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="user1" password="user1" metadataServerUrls="https://kafka1:1090";
