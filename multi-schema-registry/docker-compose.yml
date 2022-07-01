@@ -1,0 +1,212 @@
+---
+version: '3.4'
+services:
+  zookeeper1:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper1
+    container_name: zookeeper1
+    ports:
+      - "1181:1181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 1181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+    networks:
+      example.com: {}
+
+  zookeeper2:
+    cpus: 0.7
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper2
+    container_name: zookeeper2
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+    networks:
+      example.com: {}
+
+
+  kafka1:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka1
+    container_name: kafka1
+    restart: always
+    ports:
+      - 1090:1090
+      - 1092:1092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:1181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:1092,PLAINTEXT://kafka1:1093
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: "false"
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://kafka1:1090
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:1093
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: PLAINTEXT
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: 'true'
+
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry1:1081
+      KAFKA_KAFKA_REST_BOOTSTRAP_SERVERS: kafka1:1093
+      KAFKA_KAFKA_REST_SCHEMA_REGISTRY_URL: http://schemaregistry1:1081
+      
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "false"
+
+      KAFKA_CONFLUENT_TELEMETRY_SCHEMA_REGISTRY_URL: http://schemaregistry1:1081
+
+    networks:
+      example.com: {}
+  
+  kafka2:
+    cpus: 0.7
+    image: confluentinc/cp-server:$TAG
+    hostname: kafka2
+    container_name: kafka2
+    restart: always
+    ports:
+      - 2090:2090
+      - 2092:2092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper2:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://localhost:2092,PLAINTEXT://kafka2:2093
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_REPORTERS_TELEMETRY_AUTO_ENABLE: 'false'
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_ENABLE: 'false'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_METADATA_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://kafka2:2090
+      
+      KAFKA_UNCLEAR_LEADER_ELECTION_ENABLE: 'false'
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:1093
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: PLAINTEXT
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: 'true'
+
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry2:2081
+      KAFKA_KAFKA_REST_BOOTSTRAP_SERVERS: kafka2:2093
+      KAFKA_KAFKA_REST_SCHEMA_REGISTRY_URL: http://schemaregistry2:2081
+
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "false"
+      KAFKA_CONFLUENT_TELEMETRY_SCHEMA_REGISTRY_URL: http://schemaregistry2:2081
+
+    networks:
+      example.com: {}
+
+  schemaregistry1:
+    image: confluentinc/cp-schema-registry:$TAG
+    hostname: schemaregistry1
+    container_name: schemaregistry1
+    restart: always
+    depends_on:
+      - kafka1
+    ports:
+    - 1081:1081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry1
+      SCHEMA_REGISTRY_GROUP_ID: schema-registry_1
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:1093'
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:1081
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: 'true'
+      SCHEMA_REGISTRY_DEBUG: 'true'
+      SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.schema.exporter.SchemaExporterResourceExtension
+      SCHEMA_REGISTRY_KAFKASTORE_UPDATE_HANDLERS: io.confluent.schema.exporter.storage.SchemaExporterUpdateHandler
+      SCHEMA_REGISTRY_PASSWORD_ENCODER_SECRET: password
+    networks:
+      example.com: {}
+
+  schemaregistry2:
+    image: confluentinc/cp-schema-registry:$TAG
+    hostname: schemaregistry2
+    container_name: schemaregistry2
+    restart: always
+    depends_on:
+      - kafka2
+    ports:
+    - 2081:2081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry2
+      SCHEMA_REGISTRY_GROUP_ID: schema-registry_2
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:1093'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:2081
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: 'false'
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_DEBUG: 'true'
+      SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.schema.exporter.SchemaExporterResourceExtension
+      SCHEMA_REGISTRY_KAFKASTORE_UPDATE_HANDLERS: io.confluent.schema.exporter.storage.SchemaExporterUpdateHandler
+      SCHEMA_REGISTRY_PASSWORD_ENCODER_SECRET: password
+    networks:
+      example.com: {}
+
+  connect:
+    image: confluentinc/cp-server-connect:$TAG
+    hostname: connect
+    container_name: connect
+    restart: always
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./confluent-hub-components:/usr/share/java/plugins/confluent-hub-components
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka2:2093"
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_REST_PORT: 8083
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_LISTENERS: "http://0.0.0.0:8083"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: "/usr/share/java"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+    networks:
+      example.com: {}
+
+networks:
+  example.com:
+    name: "example.com"
+    driver: bridge
