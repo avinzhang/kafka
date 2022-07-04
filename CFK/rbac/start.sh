@@ -28,6 +28,7 @@ echo "Done"
 echo
 echo "---------------------------------------"
 echo "INSTALL LDAP SERVER-------"
+helm repo add stable https://charts.helm.sh/stable
 helm upgrade --install openldap stable/openldap -f ./openldap.yaml
 echo "done"
 echo
