@@ -154,4 +154,6 @@ echo "* Creating persistent kstream pageviews_female ....done"
 echo "* Creating persistent kstream pageviews_female_like_89 ....done"
 echo "* Creating persistent ktable pageviews_region .....done"
 
-
+# helm ldap setup for C3 ldap authentication
+#echo "INSTALL LDAP SERVER-------"
+#helm upgrade --install openldap stable/openldap -f ./openldap.yaml
