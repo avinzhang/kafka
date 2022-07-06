@@ -70,3 +70,7 @@
 	path = src/kafka-connect-storage-cloud
 	url = git@github.com:confluentinc/kafka-connect-storage-cloud.git
   ignore = all
+[submodule "CFK/confluent-operator"]
+	path = CFK/confluent-operator
+	url = git@github.com:confluentinc/confluent-operator.git
+  ignore = all
