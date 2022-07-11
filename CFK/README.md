@@ -134,3 +134,7 @@
   ```
   kubectl get node --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
   ```
+  * Get all CRD version
+  ```
+  kubectl get crd -o=jsonpath="{range .items[*]}{.metadata.name}{'|| \tcontroller-gen.kubebuilder.io/version\t ||'}{.metadata.annotations.controller-gen\.kubebuilder\.io/version}{\"\n\"}{end}" | grep -i confluent
+  ```
