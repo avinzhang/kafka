@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-export TAG=7.0.1
-export INIT_TAG=2.3.0
+export TAG=7.2.0
+export INIT_TAG=2.4.0
 echo "Starting up Confluent for Kubernetes"
 echo
 echo
@@ -21,8 +21,8 @@ echo "---------------------------------------"
 echo
 echo
 echo "Install confluent for kubernetes"
-#helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
-helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes --version="0.435.11"
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes 
+#helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes --version="0.435.23"
 echo
 echo
 echo "Install Confluent Platform components"
