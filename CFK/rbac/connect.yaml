@@ -7,8 +7,18 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: nivavin/cp-server-connect-with-datagen:$TAG
+    application: confluentinc/cp-server-connect:$TAG
     init: confluentinc/confluent-init-container:$INIT_TAG
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: latest
+      storageLimit: 1G
   tls:
     secretRef: tls-connect
 #  externalAccess:
