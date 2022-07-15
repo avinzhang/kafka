@@ -32,7 +32,6 @@ while [ $STARTED == false ]
 do
    
     CLUSTER_STATUS=`confluent kafka cluster list -ojson|jq '.[]|select(.name == "avin-basic")'|jq -r .status`
-    echo $CLUSTER_STATUS
     if [ "$CLUSTER_STATUS" == "UP" ]; then
       STARTED=true
       echo "Cluster is up"
