@@ -1,8 +1,9 @@
 #!/bin/bash
 
-#CLOUD_CLUSTER_ENDPOINT=`terraform -chdir=./cloud output -json | jq -r '."cloud-cluster-endpoint"."value"'`
-#REPLICATOR_API_KEY=`terraform -chdir=./cloud output -json | jq -r '."replicator-api-key"."value"'`
-#REPLICATOR_API_SECRET=`terraform -chdir=./cloud output -json | jq -r '."replicator-api-secret"."value"'`
+CLOUD_CLUSTER_ENDPOINT=`terraform -chdir=./cloud output -json | jq -r '."cloud-cluster-endpoint"."value"'`
+REPLICATOR_API_KEY=`terraform -chdir=./cloud output -json | jq -r '."replicator-api-key"."value"'`
+REPLICATOR_API_SECRET=`terraform -chdir=./cloud output -json | jq -r '."replicator-api-secret"."value"'`
+
 
 curl -i -X POST \
     --cacert ./secrets/ca.crt \
@@ -26,17 +27,17 @@ curl -i -X POST \
            "src.kafka.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"connectUser\" password=\"connectUser\";",
            "src.kafka.sasl.mechanism": "PLAIN",
            "src.consumer.group.id": "connect-replicator",
-           "dest.kafka.bootstrap.servers": "pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092",
+           "dest.kafka.bootstrap.servers": "'"$CLOUD_CLUSTER_ENDPOINT"'",
            "dest.kafka.security.protocol": "SASL_SSL",
-           "dest.kafka.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"NXHICQQ2HJNJ2POT\" password=\"bZSZXlZ3rnG2SJwFNEACKxprxuVruiv9HSE0BZ1JlHfIogIx1VSlZdM4z0RWWHuK\";",
+           "dest.kafka.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"'"$REPLICATOR_API_KEY"'\" password=\"'"$REPLICATOR_API_SECRET"'\";",
            "dest.kafka.ssl.truststore.location": "/etc/kafka/secrets/cacerts",
            "dest.kafka.ssl.truststore.password": "changeit",
            "dest.kafka.sasl.mechanism": "PLAIN",
            "offset.timestamps.commit": "false",
-           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"NXHICQQ2HJNJ2POT\" password=\"bZSZXlZ3rnG2SJwFNEACKxprxuVruiv9HSE0BZ1JlHfIogIx1VSlZdM4z0RWWHuK\";",
+           "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"'"$REPLICATOR_API_KEY"'\" password=\"'"$REPLICATOR_API_SECRET"'\";",
            "producer.override.security.protocol": "SASL_SSL",
            "producer.override.sasl.mechanism":"PLAIN",
-           "producer.override.bootstrap.servers": "pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092",
+           "producer.override.bootstrap.servers": "'"$CLOUD_CLUSTER_ENDPOINT"'",
            "producer.override.ssl.truststore.location": "/etc/kafka/secrets/cacerts",
            "producer.override.ssl.truststore.password": "changeit",
            "producer.override.sasl.login.callback.handler.class": "org.apache.kafka.common.security.authenticator.AbstractLogin$DefaultLoginCallbackHandler",
