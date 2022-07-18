@@ -32,6 +32,7 @@
     instance_tags:
       Name: "{{ item.tag_name }}"
       Environment: "{{ item.tag_environment }}"
+      owner_email: "{{ lookup('env', 'OWNER_EMAIL') }}"
     region: "{{ item.region }}"
     assign_public_ip: yes
     vpc_subnet_id: "{{ subnet.subnet.id }}"
