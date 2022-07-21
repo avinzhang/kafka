@@ -1257,9 +1257,9 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "confluent_kafka_server_connector_dead_letter_queue_records{connector_kafka_id=~\"$cluster\"}",
+              "expr": "confluent_kafka_connect_dead_letter_queue_records{connector_id=~\"$connector\"}",
               "interval": "",
-              "legendFormat": "{{connector_kafka_id}} -- {{connector_id}}",
+              "legendFormat": "{{connector_id}} -- {{connector_id}}",
               "queryType": "randomWalk",
               "refId": "A"
             }
@@ -1312,7 +1312,7 @@
           "pluginVersion": "7.3.7",
           "targets": [
             {
-              "expr": "count(confluent_kafka_server_connector_dead_letter_queue_records{connector_kafka_id=~\"$cluster\"})",
+              "expr": "count(confluent_kafka_connect_dead_letter_queue_records{connector_id=~\"$connector\"})",
               "interval": "",
               "legendFormat": "",
               "queryType": "randomWalk",
@@ -1372,7 +1372,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "confluent_kafka_server_connector_sent_records{connector_kafka_id=~\"$cluster\"}",
+              "expr": "confluent_kafka_connect_sent_records{connector_id=~\"$connector\"}",
               "interval": "",
               "legendFormat": "{{connector_kafka_id}} -- {{connector_id}}",
               "queryType": "randomWalk",
@@ -1468,7 +1468,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "confluent_kafka_server_connector_received_bytes{connector_kafka_id=~\"$cluster\"}",
+              "expr": "confluent_kafka_connect_received_bytes{connector_id=~\"$connector\"}",
               "interval": "",
               "legendFormat": "{{connector_kafka_id}} -- {{connector_id}}",
               "queryType": "randomWalk",
@@ -1564,7 +1564,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "confluent_kafka_server_connector_sent_bytes{connector_kafka_id=~\"$cluster\"}",
+              "expr": "confluent_kafka_connect_sent_bytes{connector_id=~\"$connector\"}",
               "interval": "",
               "legendFormat": "{{connector_kafka_id}} -- {{connector_id}}",
               "queryType": "randomWalk",
@@ -1660,7 +1660,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "confluent_kafka_server_connector_received_records{connector_kafka_id=~\"$cluster\"}",
+              "expr": "confluent_kafka_connect_received_records{connector_id=~\"$connector\"}",
               "interval": "",
               "legendFormat": "{{connector_kafka_id}} -- {{connector_id}}",
               "queryType": "randomWalk",

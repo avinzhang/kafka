@@ -2,14 +2,14 @@ terraform {
   required_providers {
     confluent = {
       source  = "confluentinc/confluent"
-      version = "0.9.0"
+      version = "1.0.0"
     }
   }
 }
 
 provider "confluent" {
-  api_key    = var.confluent_cloud_api_key
-  api_secret = var.confluent_cloud_api_secret
+  cloud_api_key    = var.confluent_cloud_api_key
+  cloud_api_secret = var.confluent_cloud_api_secret
 }
 
 #resource "confluent_environment" "avin" {
@@ -67,7 +67,7 @@ resource "confluent_kafka_topic" "orders" {
     id = confluent_kafka_cluster.basic.id
   }
   topic_name    = "orders"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -110,7 +110,7 @@ resource "confluent_kafka_acl" "app-producer-write-on-topic" {
   host          = "*"
   operation     = "WRITE"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -153,7 +153,7 @@ resource "confluent_kafka_acl" "app-consumer-read-on-topic" {
   host          = "*"
   operation     = "READ"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -171,7 +171,7 @@ resource "confluent_kafka_acl" "app-consumer-read-on-group" {
   host          = "*"
   operation     = "READ"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -195,7 +195,7 @@ resource "confluent_kafka_acl" "app-connector-describe-on-cluster" {
   host          = "*"
   operation     = "DESCRIBE"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -213,7 +213,7 @@ resource "confluent_kafka_acl" "app-connector-write-on-target-topic" {
   host          = "*"
   operation     = "WRITE"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -231,7 +231,7 @@ resource "confluent_kafka_acl" "app-connector-create-on-data-preview-topics" {
   host          = "*"
   operation     = "CREATE"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -249,7 +249,7 @@ resource "confluent_kafka_acl" "app-connector-write-on-data-preview-topics" {
   host          = "*"
   operation     = "WRITE"
   permission    = "ALLOW"
-  http_endpoint = confluent_kafka_cluster.basic.http_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
