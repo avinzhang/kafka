@@ -16,7 +16,7 @@
     ```
      eksctl create cluster \
      --version 1.22 \
-     --name avin \
+     --name avin-eks \
      --region ap-southeast-2 \
      --nodegroup-name eks-ng \
      --node-type t3.small \
