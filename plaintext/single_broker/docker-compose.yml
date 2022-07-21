@@ -81,7 +81,7 @@ services:
     ports:
       - "8083:8083"
     volumes:
-      - ./jar:/usr/share/java/jar
+      - ./confluent-hub-components:/usr/share/java/confluent-hub-components
     environment:
       CONNECT_BOOTSTRAP_SERVERS: "kafka:9093"
       CONNECT_GROUP_ID: "connect-cluster"

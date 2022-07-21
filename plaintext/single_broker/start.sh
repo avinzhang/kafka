@@ -1,11 +1,11 @@
 #!/bin/bash
 
-export TAG=7.1.1.arm64
+export TAG=7.2.0.arm64
 datagen_version=latest
 
 echo "----Download datagen connector-----------"
-mkdir -p ./jar/datagen
-ls ./jar/datagen/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:$datagen_version --no-prompt
+mkdir -p ./confluent-hub-components
+ls ./confluent-hub-components/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./confluent-hub-components confluentinc/kafka-connect-datagen:$datagen_version --no-prompt
 echo "Done"
 echo
 echo
