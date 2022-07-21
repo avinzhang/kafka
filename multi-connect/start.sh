@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.2.arm64
+export TAG=7.1.2
 
 echo "----------Start zookeeper and broker -------------"
 docker compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
@@ -25,8 +25,6 @@ echo ">> Download datagen connector"
 mkdir -p confluent-hub-components
 ls ./confluent-hub-components/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./confluent-hub-components confluentinc/kafka-connect-datagen:latest --no-prompt
 echo "Done"
-echo ">> Download replicator connector"
-ls ./confluent-hub-components/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-*.jar || confluent-hub install --no-prompt --component-dir ./confluent-hub-components confluentinc/kafka-connect-replicator:latest
 echo
 echo ">> Starting up Kafka connect"
 docker compose up -d --build --no-deps connect1 connect2 connect3
@@ -66,6 +64,7 @@ curl -i -X POST \
        }
    }'
 echo
+sleep 5
 echo ">> Check connector status"
 echo "Datagen-users: `curl -s http://localhost:1083/connectors/datagen-users/status`"
 echo
@@ -92,6 +91,7 @@ curl -i -X POST \
    }'
 
 echo
+sleep 5
 echo ">> Check connector status"
 echo "Datagen-pageviews: `curl -s http://localhost:1083/connectors/datagen-pageviews/status`"
 echo
