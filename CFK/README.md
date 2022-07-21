@@ -15,8 +15,8 @@
     * Create cluster with eksctl, the provisioning process will take a while
     ```
      eksctl create cluster \
-     --version 1.20 \
-     --name avin-eks \
+     --version 1.22 \
+     --name avin \
      --region ap-southeast-2 \
      --nodegroup-name eks-ng \
      --node-type t3.small \
@@ -28,7 +28,8 @@
      --managed \
      --node-private-networking \
      --zones ap-southeast-2a,ap-southeast-2b,ap-southeast-2c \
-     --verbose 3
+     --verbose 3 \
+     --tags owner_email=$OWNER_EMAIL
     ```
     * Delete the cluster
     ```
