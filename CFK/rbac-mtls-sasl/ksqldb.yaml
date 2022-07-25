@@ -1,0 +1,326 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  authorization:
+    type: rbac
+  tls:
+    secretRef: tls-ksqldb
+#  configOverrides:
+#    server:
+#    - ksql.schema.registry.url=https://schemaregistry:8081
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: ksqldb-mds-client
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+#      authentication:
+#        type: basic
+#        basic:
+#          secretRef: sr-mds-client
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-topic-users
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: users
+      patternType: PREFIXED
+      resourceType: Topic
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-topic-pageviews
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: pageviews
+      patternType: PREFIXED
+      resourceType: Topic
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-subject-users
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: users
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-subject-pageviews
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: pageviews
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-subject-users-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: ResourceOwner
+  resourcePatterns:
+    - name: users
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-subject-pageviews-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: ResourceOwner
+  resourcePatterns:
+    - name: pageviews
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-group
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: _confluent-ksql-confluent.ksqldb_
+      patternType: PREFIXED
+      resourceType: Group
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-group-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: ResourceOwner
+  resourcePatterns:
+    - name: _confluent-ksql-confluent.ksqldb_
+      patternType: PREFIXED
+      resourceType: Group
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-topic-confluent-ksql-confluent.ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: _confluent-ksql-confluent.ksqldb_
+      patternType: PREFIXED
+      resourceType: Topic
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-subject-confluent-ksql-confluent.ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: _confluent-ksql-confluent.ksqldb_
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-topic-confluent-ksql-processing-log
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: confluent.ksql_ksql_processing_log
+      patternType: LITERAL
+      resourceType: Topic
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-transactionid-ksqluser
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: confluent.ksqldb_
+      patternType: LITERAL
+      resourceType: TransactionalId
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-transactionid-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: ResourceOwner
+  resourcePatterns:
+    - name: confluent.ksqldb_
+      patternType: LITERAL
+      resourceType: TransactionalId
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-cluster
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksqluser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
+  clustersScopeByIds:
+    ksqlClusterId: confluent.ksqldb_
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-cluster-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: DeveloperWrite
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
+  clustersScopeByIds:
+    ksqlClusterId: confluent.ksqldb_
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-topic-users-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: ResourceOwner
+  resourcePatterns:
+    - name: users
+      patternType: PREFIXED
+      resourceType: Topic
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-topic-pageviews-ksql
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ksql
+  role: ResourceOwner
+  resourcePatterns:
+    - name: pageviews
+      patternType: PREFIXED
+      resourceType: Topic

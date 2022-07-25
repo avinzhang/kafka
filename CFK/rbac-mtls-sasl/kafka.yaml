@@ -1,0 +1,73 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  authorization:
+    type: rbac
+    superUsers:
+    - User:kafka
+  configOverrides:
+    server:
+      - confluent.balancer.heal.uneven.load.trigger=ANY_UNEVEN_LOAD
+      - auto.create.topics.enable=true
+    log4j:
+      - log4j.logger.kafka.authorizer.logger=INFO, stdout
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      provider:
+        type: ldap
+        ldap:
+          address: ldap://openldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: posixGroup
+            groupMemberAttribute: memberuid
+            groupMemberAttributePattern: CN=(.*),ou=users,dc=example,dc=com
+            groupSearchBase: ou=groups,dc=example,dc=com
+            userNameAttribute: uid
+            userObjectClass: inetOrgPerson
+            userSearchBase: ou=users,dc=example,dc=com
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      authentication:
+        type: mtls
+      tls:
+        enabled: true

@@ -1,0 +1,160 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:$TAG
+    init: confluentinc/confluent-init-container:$INIT_TAG
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: latest
+      storageLimit: 1G
+  tls:
+    secretRef: tls-connect
+  #externalAccess:
+  #  type: loadBalancer
+  #  loadBalancer:
+  #    domain: cfk-demo.app
+  #    prefix: connect
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: connect-mds-client
+      tls:
+        enabled: true
+
+#---
+#apiVersion: platform.confluent.io/v1beta1
+#kind: ConfluentRolebinding
+#metadata:
+#  name: connect-kafka-cluster
+#  namespace: confluent
+#spec:
+#  principal:
+#    type: user
+#    name: connectuser
+#  role: DeveloperWrite
+#
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-datagen-users-topic
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: connectuser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: users
+      patternType: PREFIXED
+      resourceType: Topic
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-datagen-pageviews-topic
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: connectuser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: pageviews
+      patternType: PREFIXED
+      resourceType: Topic
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-datagen-users-subject
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: connectuser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: users
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-datagen-pageviews-subject
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: connectuser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: pageviews
+      patternType: PREFIXED
+      resourceType: Subject
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-datagen-users-connector
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: connectuser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: datagen-users
+      patternType: LITERAL
+      resourceType: Connector
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-datagen-pageviews-connector
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: connectuser
+  role: ResourceOwner
+  resourcePatterns:
+    - name: datagen-pageviews
+      patternType: LITERAL
+      resourceType: Connector
+  clustersScopeByIds:
+    connectClusterId: confluent.connect

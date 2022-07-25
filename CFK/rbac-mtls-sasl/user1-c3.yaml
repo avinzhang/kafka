@@ -1,0 +1,60 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: user1-kafka-cluster
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: user1
+  role: ClusterAdmin
+  ## if use other kafkaRestClass except for default, need to configure accordingly
+  #kafkaRestClassRef:
+  # name: default
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: user1-sr-cluster
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: user1
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+  role: SystemAdmin
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: user1-connect-cluster
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: user1
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+  role: SystemAdmin
+  ## if use other kafkaRestClass except for default, need to configure accordingly
+  #kafkaRestClassRef:
+  # name: default
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: user1-ksqldb-cluster
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: user1
+  clustersScopeByIds:
+    ksqlClusterId: confluent.ksqldb_
+  role: ResourceOwner
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
