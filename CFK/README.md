@@ -19,7 +19,7 @@
      --name avin-eks \
      --region ap-southeast-2 \
      --nodegroup-name eks-ng \
-     --node-type t3.small \
+     --node-type t3.xlarge \
      --nodes 0 \
      --nodes-min 0 \
      --nodes-max 12 \
