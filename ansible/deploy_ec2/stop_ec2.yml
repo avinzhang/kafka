@@ -15,7 +15,7 @@
     pause: prompt='You are about to stop ec2 instances. Please confirm you want to continue! Press return to continue. Press Ctrl+c and then "a" to abort'
     no_log: true
 
-  - name: Kill EC2 Instance
+  - name: STOP EC2 Instance
     ec2:
       instance_ids: "{{ item.instance_id }}"
       state: stopped
