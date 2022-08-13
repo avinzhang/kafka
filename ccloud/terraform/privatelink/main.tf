@@ -62,41 +62,43 @@ resource "confluent_kafka_cluster" "dedicated" {
   }
 }
 
-resource "confluent_service_account" "app-manager" {
-  display_name = "app-manager"
-  description  = "Service account to manage Kafka cluster"
-}
-
-resource "confluent_role_binding" "app-manager-kafka-cluster-admin" {
-  principal   = "User:${confluent_service_account.app-manager.id}"
-  role_name   = "CloudClusterAdmin"
-  crn_pattern = confluent_kafka_cluster.dedicated.rbac_crn
-}
-
-resource "confluent_api_key" "app-manager-kafka-api-key" {
-  display_name = "app-manager-kafka-api-key"
-  description  = "Kafka API Key that is owned by 'app-manager' service account"
-  owner {
-    id          = confluent_service_account.app-manager.id
-    api_version = confluent_service_account.app-manager.api_version
-    kind        = confluent_service_account.app-manager.kind
-  }
-
-  managed_resource {
-    id          = confluent_kafka_cluster.dedicated.id
-    api_version = confluent_kafka_cluster.dedicated.api_version
-    kind        = confluent_kafka_cluster.dedicated.kind
-
-    environment {
-      id = var.confluent_env_id
-    }
-  }
-
-  depends_on = [
-    confluent_role_binding.app-manager-kafka-cluster-admin,
-    confluent_private_link_access.aws,
-    aws_vpc_endpoint.privatelink,
-    aws_route53_record.privatelink,
-    aws_route53_record.privatelink-zonal,
-  ]
-}
+# The following part requires proxy to be setup and cluster endpoints is added to DNS
+# Comment all out for the first run
+#resource "confluent_service_account" "app-manager" {
+#  display_name = "app-manager"
+#  description  = "Service account to manage Kafka cluster"
+#}
+#
+#resource "confluent_role_binding" "app-manager-kafka-cluster-admin" {
+#  principal   = "User:${confluent_service_account.app-manager.id}"
+#  role_name   = "CloudClusterAdmin"
+#  crn_pattern = confluent_kafka_cluster.dedicated.rbac_crn
+#}
+#
+#resource "confluent_api_key" "app-manager-kafka-api-key" {
+#  display_name = "app-manager-kafka-api-key"
+#  description  = "Kafka API Key that is owned by 'app-manager' service account"
+#  owner {
+#    id          = confluent_service_account.app-manager.id
+#    api_version = confluent_service_account.app-manager.api_version
+#    kind        = confluent_service_account.app-manager.kind
+#  }
+#
+#  managed_resource {
+#    id          = confluent_kafka_cluster.dedicated.id
+#    api_version = confluent_kafka_cluster.dedicated.api_version
+#    kind        = confluent_kafka_cluster.dedicated.kind
+#
+#    environment {
+#      id = var.confluent_env_id
+#    }
+#  }
+#
+#  depends_on = [
+#    confluent_role_binding.app-manager-kafka-cluster-admin,
+#    confluent_private_link_access.aws,
+#    aws_vpc_endpoint.privatelink,
+#    aws_route53_record.privatelink,
+#    aws_route53_record.privatelink-zonal,
+#  ]
+#}
