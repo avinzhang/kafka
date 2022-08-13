@@ -28,7 +28,7 @@ variable "ec2_azs" {
 variable "ec2_name_security_groups" {
   type = string
   description = "EC2 security group"
-  default = "avin-sg"
+  default = "avin-tf-sg"
 }
 
 
