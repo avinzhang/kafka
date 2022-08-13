@@ -37,7 +37,7 @@ aws_keypair_name: avin-sshkey
 sshkey_path: /Users/avin/.ssh/id_rsa.pub
 
 aws_security_groups:
-- name: avin-sg
+- name: avin-ansible-sg
   description: Security group for avins instances
   region: "{{ aws_region }}"
   rules:
@@ -62,13 +62,14 @@ aws_security_groups:
     - 8083
     - 8081
     - 9021
+    - 9095
     - 389
     - 636
     cidr_ip: 10.10.0.0/16
-  #- proto: tcp
-  #  ports:
-  #  - 9021
-  #  cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    ports:
+    - 443
+    cidr_ip: 0.0.0.0/0
   rules_egress:
   - proto: all
     cidr_ip: 0.0.0.0/0
