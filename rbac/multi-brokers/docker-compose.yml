@@ -637,12 +637,11 @@ services:
     ports:
     - 8083:8083
     volumes:
-    - ./jar:/usr/share/java/jar
+    - ./confluent-hub-components:/usr/share/java/plugins/confluent-hub-components
     - ./secrets:/etc/kafka/secrets
     environment:
       CUB_CLASSPATH: '/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
-      CLASSPATH: '/usr/share/java/jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-7.0.1.jar,/usr/share/java/monitoring-interceptors/*'
-      CONNECT_BOOTSTRAP_SERVERS: "kafka1:1093"
+      CONNECT_BOOTSTRAP_SERVERS: "kafka1:1093,kafka2:2093,kafka3:3093"
       CONNECT_GROUP_ID: connect-cluster
       CONNECT_LISTENERS: "https://0.0.0.0:8083"
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
@@ -777,18 +776,18 @@ services:
     environment:
       CUB_CLASSPATH: '/usr/share/java/confluent-security/ksql/*:/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*'
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
-      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 1
-      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 1
+      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 2
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 2
 
-      KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
+      KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 2
 
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 2
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
 
       KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
 
-      KSQL_BOOTSTRAP_SERVERS: kafka1:1093
+      KSQL_BOOTSTRAP_SERVERS: kafka1:1093,kafka2:2093,kafka3:3093
       KSQL_HOST_NAME: ksqldb-server
       KSQL_KSQL_SERVICE_ID: ksqldb-cluster
       KSQL_LISTENERS: https://0.0.0.0:8088

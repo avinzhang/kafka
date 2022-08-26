@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.1.arm64
+export TAG=7.2.1.arm64
 
 echo "----------Start zookeeper" 
 docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
@@ -123,11 +123,11 @@ echo
 echo "----Setup Kafka Connect------------"
 echo
 echo ">> Download datagen connector"
-mkdir -p ./jar/datagen
-ls ./jar/datagen/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:latest --no-prompt
+mkdir -p ./confluent-hub-components
+ls ./confluent-hub-components/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./confluent-hub-components confluentinc/kafka-connect-datagen:latest --no-prompt
 echo "Done"
 echo ">> Download replicator connector"
-ls ./jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-*.jar || confluent-hub install --no-prompt --component-dir ./jar confluentinc/kafka-connect-replicator:latest
+ls ./confluent-hub-components/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-*.jar || confluent-hub install --no-prompt --component-dir ./confluent-hub-components confluentinc/kafka-connect-replicator:latest
 echo
 echo ">> Adding role binding for connectAdmin"
 confluent iam rbac role-binding create --principal User:connectAdmin --role SecurityAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
