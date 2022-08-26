@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.2.arm64
+export TAG=7.2.1.arm64
 
 echo "----Start two clusters----"
 echo "Cluster1: zookeeper1 and kafka1"
