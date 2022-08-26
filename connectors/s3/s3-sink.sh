@@ -78,8 +78,7 @@ docker-compose exec connect curl -X POST -H "Content-Type: application/json" htt
         "config": {
           "connector.class": "io.confluent.connect.s3.S3SinkConnector",
           "topics":"snacks_avro",
-          "key.converter": "io.confluent.connect.avro.AvroConverter",
-          "key.converter.schema.registry.url": "http://schemaregistry:8081",
+          "key.converter": "org.apache.kafka.connect.storage.StringConverter",
           "value.converter": "io.confluent.connect.avro.AvroConverter",
           "value.converter.schema.registry.url": "http://schemaregistry:8081",
           "tasks.max": "1",
