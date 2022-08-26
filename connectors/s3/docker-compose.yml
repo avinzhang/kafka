@@ -281,7 +281,7 @@ services:
       example.com: {}
 
   controlcenter:
-    image: confluentin/cp-enterprise-control-center:$TAG
+    image: confluentinc/cp-enterprise-control-center:$TAG
     hostname: controlcenter
     container_name: controlcenter
     restart: always
@@ -299,7 +299,7 @@ services:
       CONTROL_CENTER_REST_LISTENERS: http://0.0.0.0:9021
 
       CONTROL_CENTER_CONNECT_CONNECT-CLUSTER_CLUSTER: http://connect:8083
-      CONTROL_CENTER_SCHEMA_REGISTRY_SR1_URL: http://schemaregistry:8081
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: http://schemaregistry:8081
       CONTROL_CENTER_KSQL_KSQLCLUSTER_URL: http://ksqldb-server:8088
 
       CONTROL_CENTER_STREAMS_CPREST_URL: http://kafka1:1090,http://kafka2:2090,http://kafka3:3090
