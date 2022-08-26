@@ -11,6 +11,7 @@
 *.swp
 *.DS_Store
 jar/
+mc
 .terraform/
 .terraform.lock.hcl
 artifacts
