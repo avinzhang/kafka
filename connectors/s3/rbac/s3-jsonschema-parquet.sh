@@ -83,6 +83,11 @@ ssl.truststore.password=confluent
 ssl.key.password=confluent
 EOF'
 echo
+echo ">>>Add SystemAdmin user"
+confluent iam rbac role-binding create --principal User:sysadmin --role SystemAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID
+confluent iam rbac role-binding create --principal User:sysadmin --role SystemAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --schema-registry-cluster-id schema-registry
+confluent iam rbac role-binding create --principal User:sysadmin --role SystemAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --connect-cluster-id connect-cluster
+confluent iam rbac role-binding create --principal User:sysadmin --role SystemAdmin --kafka-cluster-id $KAFKA_CLUSTER_ID --ksql-cluster-id ksqldb-cluster
 echo 
 echo "---- Setup Rest Proxy ---"
 confluent iam rbac role-binding create --principal User:restproxy --role DeveloperRead --resource Topic:_confluent-command --kafka-cluster-id $KAFKA_CLUSTER_ID

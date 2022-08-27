@@ -31,6 +31,17 @@ sn: mds superuser
 uid: mds
 userPassword: mds
 
+dn: cn=sysadmin,ou=users,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: system admin
+sn: system admin
+uid: sysadmin
+userPassword: sysadmin
+
 dn: cn=interbroker,ou=users,{{ LDAP_BASE_DN }}
 changetype: add
 objectClass: top
