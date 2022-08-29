@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.2.1.arm64
+export TAG=7.2.1
 
 echo "----------Start zookeeper" 
 docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
@@ -119,7 +119,7 @@ do
 done
 echo
 echo ">> Starting up schema registry"
-docker-compose up -d --build --no-deps schemaregistry &>/dev/null
+docker-compose up -d --build --no-deps schemaregistry 
 echo
 echo
 echo "-------------------------------------------------------------------"
@@ -375,7 +375,15 @@ echo
 echo 
 echo "---Start Minio----"
 docker-compose up -d --build --no-deps minio
-ls mc || wget https://dl.minio.io/client/mc/release/darwin-arm64/mc && chmod +x ./mc
+
+echo ">>>Download mc for mac"
+ARCH=`uname -m`
+if [ $ARCH == "arm64" ]
+  then
+    ls mc || wget https://dl.minio.io/client/mc/release/darwin-arm64/mc && chmod +x ./mc
+else
+  ls mc || wget https://dl.minio.io/client/mc/release/darwin-amd64/mc && chmod +x ./mc
+fi
 echo
 sleep 3
 echo ">>>Create bucket"
@@ -421,7 +429,9 @@ curl -i -X POST \
   }'
 
 echo
+sleep 3
 curl --cacert ./secrets/ca.crt -u connectUser:connectUser https://localhost:8083/connectors/s3-sink/status
 echo
+sleep 5
 echo ">> List messages in minio storage"
 ./mc ls myminio/mys3bucket/topics/snacks_avro/partition=0
