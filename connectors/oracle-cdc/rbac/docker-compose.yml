@@ -915,13 +915,14 @@ services:
       example.com: {}
 
   oracle:
-    image: oracle-19.3.0:latest
+    image: container-registry.oracle.com/database/enterprise:19.3.0.0
     hostname: oracle
     container_name: oracle
     ports: 
     - 1521:1521
     environment:
-      ORACLE_PWD: Admin123
+      ORACLE_PWD: "Admin123"
+      ORACLE_EDITION: "enterprise"
     volumes:
     - ./oracle/oradata:/opt/oracle/oradata
     - ./secrets:/opt/oracle/secrets

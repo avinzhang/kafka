@@ -20,7 +20,10 @@ do
     fi
     sleep 5
 done
-echo
+echo ">> Pull Oracle docker container"
+docker login -u $ORACLE_DOCKER_USERNAME -p $ORACLE_DOCKER_PASSWORD container-registry.oracle.com
+docker pull container-registry.oracle.com/database/enterprise:19.3.0.0
+docker logout container-registry.oracle.com
 echo
 echo "-----------Start brokers"
 docker-compose up -d --build --no-deps kafka1 kafka2 kafka3 oracle
@@ -336,10 +339,14 @@ curl -i -X POST \
        }
    }'
 echo
+sleep 5
 echo ">> Check connector status"
 echo "Oracle CDC source: `curl -s --cacert ./secrets/ca.crt -u connectUser:connectUser https://localhost:8083/connectors/oracle-cdc/status`"
 echo
-docker-compose exec kafka1 bash -c 'cat << EOF > /tmp/connectUser-rbac.properties
+echo ">>> List topics"
+docker-compose exec kafka1 kafka-topics -bootstrap-server kafka1:1093 --command-config /tmp/client-rbac.properties --list
+echo
+docker-compose exec connect bash -c 'cat << EOF > /tmp/connectUser-rbac.properties
 sasl.mechanism=OAUTHBEARER
 security.protocol=SASL_SSL
 ssl.truststore.location=/etc/kafka/secrets/user1.truststore.jks
@@ -348,4 +355,6 @@ sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="connectUser" password="connectUser" metadataServerUrls="https://kafka1:1090";
 EOF'
 echo
-docker-compose exec kafka1 kafka-topics --bootstrap-server kafka1:1093 --command-config /tmp/connectUser-rbac.properties --list
+confluent iam rbac role-binding create --principal User:connectUser --role ResourceOwner --resource Group:oracle-consumer-group --kafka-cluster-id $KAFKA_CLUSTER_ID 
+echo
+docker-compose exec connect kafka-avro-console-consumer --group=oracle-consumer-group --property schema.registry.url=https://schemaregistry:8081 --property schema.registry.ssl.truststore.location=/etc/kafka/secrets/user1.truststore.jks --property schema.registry.ssl.truststore.password=confluent --property schema.registry.basic.auth.user.info=connectUser:connectUser --property basic.auth.credentials.source=USER_INFO --bootstrap-server kafka1:1093 --consumer.config /tmp/connectUser-rbac.properties --from-beginning --topic ORCLCDB.C__MYUSER.CUSTOMERS
