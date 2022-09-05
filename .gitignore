@@ -17,3 +17,4 @@ mc
 artifacts
 ksqldb-console-scripts
 confluent-hub-components
+oracle
