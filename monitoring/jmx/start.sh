@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.1.2.arm64
+export TAG=7.2.1.arm64
 echo
 echo "----Start everything up with version $TAG------------"
 docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 kafka1 kafka2 kafka3 &>/dev/null
