@@ -1,41 +1,39 @@
 #!/bin/bash
 
-export TAG=7.1.2.arm64
+export TAG=7.2.1.arm64
 
 echo "----------Start zookeeper and broker -------------"
-docker compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
+docker-compose up -d --build --no-deps zookeeper1 zookeeper2 zookeeper3 
 echo "Done"
 echo
-docker compose up -d --build --no-deps kafka1 kafka2 kafka3 schemaregistry
+docker-compose up -d --build --no-deps kafka1 kafka2 kafka3 schemaregistry
 echo
 MDS_STARTED=false
 while [ $MDS_STARTED == false ]
 do
-    docker compose logs kafka1 | grep "Started NetworkTrafficServerConnector" &> /dev/null
-    if [ $? -eq 0 ]; then
+    NUM=`docker-compose logs kafka1 kafka2 kafka3 | grep "Started NetworkTrafficServerConnector" | wc -l`
+    if [ $NUM -eq 3 ]; then
       MDS_STARTED=true
-      echo "MDS is started and ready"
+      echo "All brokers are started and ready"
     else
-      echo "Waiting for MDS to start..."
+      echo "Waiting for brokers to start..."
     fi
     sleep 5
 done
 echo
 echo ">> Download datagen connector"
-mkdir -p ./jar/datagen
-ls ./jar/datagen/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./jar/datagen confluentinc/kafka-connect-datagen:latest --no-prompt
+mkdir -p ./confluent-hub-components
+ls ./confluent-hub-components/confluentinc-kafka-connect-datagen/lib/kafka-connect-datagen-*.jar || confluent-hub install  --component-dir ./confluent-hub-components confluentinc/kafka-connect-datagen:latest --no-prompt
 echo "Done"
-echo ">> Download replicator connector"
-ls ./jar/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-*.jar || confluent-hub install --no-prompt --component-dir ./jar confluentinc/kafka-connect-replicator:latest
 echo
 echo ">> Starting up Kafka connect"
-docker compose up -d --build --no-deps connect
+docker-compose up -d --build --no-deps connect
 echo
 echo
 CONNECT_STARTED=false
 while [ $CONNECT_STARTED == false ]
 do
-    docker compose logs connect | grep "Herder started" &> /dev/null
+    docker-compose logs connect | grep "Herder started" &> /dev/null
     if [ $? -eq 0 ]; then
       CONNECT_STARTED=true
       echo "Kafka connect is started and ready"
@@ -66,6 +64,7 @@ curl -i -X POST \
        }
    }'
 echo
+sleep 3
 echo ">> Check connector status"
 echo "Datagen-users: `curl -s http://localhost:8083/connectors/datagen-users/status`"
 echo
@@ -92,6 +91,7 @@ curl -i -X POST \
    }'
 
 echo
+sleep 3
 echo ">> Check connector status"
 echo "Datagen-pageviews: `curl -s http://localhost:8083/connectors/datagen-pageviews/status`"
 echo
@@ -101,14 +101,14 @@ echo "-----Setup ksqldb-----------"
 echo
 echo
 echo ">> Start ksqldb server"
-docker compose up -d --build --no-deps ksqldb-server
+docker-compose up -d --build --no-deps ksqldb-server
 echo
 
 echo "Waiting"
 KSQL_STARTED=false
 while [ $KSQL_STARTED == false ]
 do
-    docker compose logs ksqldb-server | grep "Server up and running" &> /dev/null
+    docker-compose logs ksqldb-server | grep "Server up and running" &> /dev/null
     if [ $? -eq 0 ]; then
       KSQL_STARTED=true
       echo "KSQLDB is started and ready"
@@ -121,7 +121,7 @@ echo
 
 echo
 echo "Start ksql streams and queries"
-docker compose exec ksqldb-server bash -c "ksql http://localhost:8088 <<EOF
+docker-compose exec ksqldb-server bash -c "ksql http://localhost:8088 <<EOF
 SET 'auto.offset.reset'='earliest';
 CREATE STREAM pageviews (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', VALUE_FORMAT='AVRO');
 CREATE TABLE users (userid VARCHAR PRIMARY KEY, registertime BIGINT, gender VARCHAR, regionid VARCHAR) WITH (KAFKA_TOPIC='users', VALUE_FORMAT='AVRO');
@@ -134,5 +134,19 @@ EOF"
 
 echo
 echo ">> start C3"
-docker compose up -d --build --no-deps controlcenter
+docker-compose up -d --build --no-deps controlcenter
 echo
+STARTED=false
+while [ $STARTED == false ]
+do
+    docker-compose logs controlcenter | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    if [ $? -eq 0 ]; then
+      STARTED=true
+      echo "Control Center is started and ready"
+    else
+      echo "Waiting for Control Center to start..."
+    fi
+    sleep 5
+done
+echo
+

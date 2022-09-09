@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export TAG=7.2.0.arm64
+export TAG=7.2.1.arm64
 datagen_version=latest
 
 echo
@@ -11,7 +11,7 @@ echo
 ready=false
 while [ $ready == false ]
 do
-    docker-compose logs kafka1 | grep "Started NetworkTrafficServerConnector"  &> /dev/null && docker-compose logs kafka2 | grep "Started NetworkTrafficServerConnector"  &> /dev/null && docker-compose logs kafka3 | grep "Started NetworkTrafficServerConnector" &> /dev/null
+    NUM=`docker-compose logs kafka1 kafka2 kafka3 | grep "Started NetworkTrafficServerConnector" | wc -l
     if [ $? -eq 0 ]; then
       ready=true
       echo "*** Kafka broker is ready ****"
