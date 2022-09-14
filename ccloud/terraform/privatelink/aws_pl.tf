@@ -165,6 +165,7 @@ resource "null_resource" "remote"{
                        "sudo chmod +x /tmp/nginx.sh",
                        "sudo /tmp/nginx.sh",
                        "sudo cp /tmp/nginx.conf /etc/nginx/nginx.conf",
+                       "sudo semanage port -a -t http_port_t  -p tcp 9092",
                        "sudo systemctl start nginx"
                   ]
   }

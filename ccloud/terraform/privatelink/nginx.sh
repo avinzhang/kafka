@@ -29,6 +29,16 @@ stream {
     proxy_pass \$targetBackend:443;
     ssl_preread on;
  }
+  server {
+    listen 9092;
+
+    proxy_connect_timeout 1s;
+    proxy_timeout 7200s;
+    resolver $NAMESERVER;
+
+    proxy_pass \$targetBackend:9092;
+    ssl_preread on;
+  }
 }
 
 http {

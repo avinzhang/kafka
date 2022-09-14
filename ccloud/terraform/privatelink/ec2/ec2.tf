@@ -94,7 +94,7 @@ resource "aws_security_group_rule" "egress_rules" {
 }
 
 resource "aws_key_pair" "keypair" {
-  key_name   = "cluster"
+  key_name   = "avin-tf-sshkey"
   public_key = "${file(var.ec2_public_key_path)}"
 }
 

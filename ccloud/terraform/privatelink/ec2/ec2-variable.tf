@@ -58,6 +58,12 @@ variable "ec2_ingress_rules" {
           to_port     = 443
           protocol    = "tcp" 
           cidr_block  = "0.0.0.0/0" 
+   }, 
+  { 
+          from_port   = 9092
+          to_port     = 9092
+          protocol    = "tcp" 
+          cidr_block  = "0.0.0.0/0" 
    } 
 
    ] 
