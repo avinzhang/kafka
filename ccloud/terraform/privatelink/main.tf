@@ -102,3 +102,58 @@ resource "confluent_kafka_cluster" "dedicated" {
 #    aws_route53_record.privatelink-zonal,
 #  ]
 #}
+#
+#resource "confluent_kafka_topic" "orders" {
+#  kafka_cluster {
+#    id = confluent_kafka_cluster.dedicated.id
+#  }
+#  topic_name    = "orders"
+#  rest_endpoint = confluent_kafka_cluster.dedicated.rest_endpoint
+#  credentials {
+#    key    = confluent_api_key.app-manager-kafka-api-key.id
+#    secret = confluent_api_key.app-manager-kafka-api-key.secret
+#  }
+#}
+#
+#resource "confluent_role_binding" "app-producer-developer-write" {
+#  principal   = "User:${confluent_service_account.app-producer.id}"
+#  role_name   = "DeveloperWrite"
+#  crn_pattern = "${confluent_kafka_cluster.dedicated.rbac_crn}/kafka=${confluent_kafka_cluster.dedicated.id}/topic=${confluent_kafka_topic.orders.topic_name}"
+#}
+#
+#resource "confluent_service_account" "app-producer" {
+#  display_name = "app-producer"
+#  description  = "Service account to produce to 'orders' topic of 'dedicated' Kafka cluster"
+#}
+#
+#resource "confluent_api_key" "app-producer-kafka-api-key" {
+#
+#  # Set optional `disable_wait_for_ready` attribute (defaults to `false`) to `true` if the machine where Terraform is not run within a private network
+#  # disable_wait_for_ready = true
+#
+#  display_name = "app-producer-kafka-api-key"
+#  description  = "Kafka API Key that is owned by 'app-producer' service account"
+#  owner {
+#    id          = confluent_service_account.app-producer.id
+#    api_version = confluent_service_account.app-producer.api_version
+#    kind        = confluent_service_account.app-producer.kind
+#  }
+#
+#  managed_resource {
+#    id          = confluent_kafka_cluster.dedicated.id
+#    api_version = confluent_kafka_cluster.dedicated.api_version
+#    kind        = confluent_kafka_cluster.dedicated.kind
+#
+#    environment {
+#      id = var.confluent_env_id
+#    }
+#  }
+#
+#  # The goal is to ensure that Kafka connectivity through AWS PrivateLink is setup.
+#  depends_on = [
+#    confluent_private_link_access.aws,
+#    aws_vpc_endpoint.privatelink,
+#    aws_route53_record.privatelink,
+#    aws_route53_record.privatelink-zonal,
+#  ]
+#}
