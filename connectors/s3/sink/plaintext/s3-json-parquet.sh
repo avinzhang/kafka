@@ -15,13 +15,13 @@ echo "----Start minio-----------"
 docker-compose up -d --build --no-deps minio 
 sleep 5
 #download mc
-ls mc || wget https://dl.minio.io/client/mc/release/darwin-arm64/mc && chmod +x ./mc
+brew list mc || brew install minio/stable/mc
 echo
 echo ">>>Create bucket"
-./mc config host add myminio http://localhost:9000 minio minio123
-./mc admin info myminio
-./mc mb myminio/mys3bucket
-./mc ls myminio/mys3bucket
+mc config host add myminio http://localhost:9000 minio minio123
+mc admin info myminio
+mc mb myminio/mys3bucket
+mc ls myminio/mys3bucket
 echo
 connect_ready=false
 while [ $connect_ready == false ]
