@@ -96,7 +96,9 @@ EOF'
 echo "Done"
 echo 
 echo "Install ingress controller for mapping kafka broker serivces"
-helm upgrade --install nginx-ingress stable/nginx-ingress \
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
   --set controller.ingressClass=kafka \
   --set tcp.9094="confluent/kafka-0-internal:9092" \
   --set tcp.9095="confluent/kafka-1-internal:9092" \

@@ -235,5 +235,7 @@ echo "Install ingress services"
 kubectl apply -f ./ingress-hostbased-v1.yaml
 echo
 echo "----Start nginix ingress controller---------------------"
-helm upgrade --install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true --set controller.extraArgs.enable-ssl-passthrough="true"
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true --set controller.extraArgs.enable-ssl-passthrough="true"
 echo "done"
