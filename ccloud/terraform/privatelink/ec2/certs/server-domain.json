@@ -1,0 +1,20 @@
+{
+  "CN": "*.aws-vpn.example.com",
+  "hosts": [
+    "$i",
+    "*.aws-vpn.example.com"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "Ca",
+      "L": "MTV",
+      "O": "Confluent",
+      "OU": "CSE"
+    }
+  ]
+}
