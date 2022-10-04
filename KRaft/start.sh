@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG=7.2.1
+TAG=7.2.1.arm64
 
 echo "Setup metadata.properties for broker logs"
 mkdir -p logs/kafka1 logs/kafka3 logs/kafka2
