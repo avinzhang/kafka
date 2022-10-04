@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TAG=7.2.1
+
 echo "Setup metadata.properties for broker logs"
 mkdir -p logs/kafka1 logs/kafka3 logs/kafka2
 CLUSTER_ID=`kafka-storage random-uuid`
