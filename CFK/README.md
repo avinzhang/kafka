@@ -29,7 +29,7 @@
      --node-private-networking \
      --zones ap-southeast-2a,ap-southeast-2b,ap-southeast-2c \
      --verbose 3 \
-     --tags owner_email=$OWNER_EMAIL
+     --tags owner_email=$OWNER
     ```
     * Delete the cluster
     ```
